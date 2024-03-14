@@ -1,12 +1,13 @@
 PATH
   remote: .
   specs:
-    avs (0.0.1)
+    avs (0.0.2)
       gli (~> 2.21.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    bump (0.10.0)
     gli (2.21.1)
     minitest (5.22.3)
     psych (5.1.2)
@@ -21,6 +22,7 @@ PLATFORMS
 
 DEPENDENCIES
   avs!
+  bump
   minitest
   rake
   rdoc
