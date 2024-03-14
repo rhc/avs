@@ -1,7 +1,8 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative 'model'
-require_relative 'fixture'
+require 'gli'
+require_relative '../lib/avs'
 
 class App
   extend GLI::App
