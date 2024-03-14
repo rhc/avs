@@ -1,72 +1,21 @@
-# frozen_string_literal: true
-class CmdbAsset
-  attr_accessor :id,
-                :country_code,
-                :business_unit,
-                :sub_area,
-                :application,
-                :utr,
-                :fqdn,
-                :host_name,
-                :ip_address,
-                :operating_system,
-                :server_environment,
-                :server_category,
-                :host_key,
-                :country
-
-  def initialize(id:,
-                 country_code:,
-                 business_unit:,
-                 sub_area:,
-                 application:,
-                 utr:,
-                 fqdn:,
-                 host_name:,
-                 ip_address:,
-                 operating_system:,
-                 server_environment:,
-                 server_category:,
-                 host_key:,
-                 country:)
-    @id = id
-    @country_code = country_code
-    @business_unit = business_unit
-    @sub_area = sub_area
-    @application = application
-    @utr = utr
-    @fqdn = fqdn
-    @host_name = host_name
-    @ip_address = ip_address
-    @operating_system = operating_system
-    @server_category = server_category
-    @server_environment = server_environment
-    @host_key = host_key
-    @country = country
-  end
-
-  def site_name
-    ['', country_code, business_unit, sub_area, application, utr].join(':')
-  end
-
-  def self.from_csv(row)
-    CmdbAsset.new(id: row[:id],
-                  country_code: row[:country_code],
-                  country: row[:country],
-                  business_unit: row[:business_unit],
-                  sub_area: row[:sub_area],
-                  application: row[:application],
-                  utr: row[:utr],
-                  fqdn: row[:fqdn],
-                  ip_address: row[:ip_address],
-                  host_name: row[:host_name],
-                  host_key: row[:host_key],
-                  operating_system: row[:operating_system],
-                  server_environment: row[:server_environment],
-                  server_category: row[:server_category])
-  end
-
-  def to_s
-    [id, site_name, fqdn, ip_address].join ','
-  end
+# Ensure we require the local version and not one we might have installed already
+require File.join([File.dirname(__FILE__),'lib','avs','version.rb'])
+spec = Gem::Specification.new do |s|
+  s.name = 'avs'
+  s.version = Avs::VERSION
+  s.author = 'Christian Kyony'
+  s.email = 'ckyony@changamuka.com'
+  s.homepage = 'http://your.website.com'
+  s.platform = Gem::Platform::RUBY
+  s.summary = 'A description of your project'
+  s.files = `git ls-files`.split(" ")
+  s.require_paths << 'lib'
+  s.extra_rdoc_files = ['README.rdoc','avs.rdoc']
+  s.rdoc_options << '--title' << 'avs' << '--main' << 'README.rdoc' << '-ri'
+  s.bindir = 'bin'
+  s.executables << 'avs'
+  s.add_development_dependency('rake')
+  s.add_development_dependency('rdoc')
+  s.add_development_dependency('minitest')
+  s.add_runtime_dependency('gli','~> 2.21.1')
 end
