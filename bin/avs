@@ -21,7 +21,7 @@ class App
   arg_name 'The name of the argument'
   flag %i[f flagname]
 
-  desc 'Describe vulnerability here'
+  desc 'Manage vulnerabilities'
   arg_name 'Describe arguments to vulnerability here'
   command :vulnerability do |c|
     c.action do |_global_options, _options, _args|
@@ -29,8 +29,8 @@ class App
     end
   end
 
-  desc 'Describe solution here'
-  arg_name 'Describe arguments to solution here'
+  desc 'Manage solutions'
+  arg_name 'Manage solutions'
   command :solution do |c|
     c.action do |_global_options, _options, _args|
       puts 'solution command ran'
