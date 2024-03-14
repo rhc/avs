@@ -1,74 +1,71 @@
-require_relative 'model'
+class CmdbAsset
+  attr_accessor :id,
+                :country_code,
+                :business_unit,
+                :sub_area,
+                :application,
+                :utr,
+                :fqdn,
+                :host_name,
+                :ip_address,
+                :operating_system,
+                :server_environment,
+                :server_category,
+                :host_key,
+                :country
 
-# Reopen the App class or module to add the 'asset' command
-class App
-  extend GLI::App
+  def initialize(id:,
+                 country_code:,
+                 business_unit:,
+                 sub_area:,
+                 application:,
+                 utr:,
+                 fqdn:,
+                 host_name:,
+                 ip_address:,
+                 operating_system:,
+                 server_environment:,
+                 server_category:,
+                 host_key:,
+                 country:)
+    @id = id
+    @country_code = country_code
+    @business_unit = business_unit
+    @sub_area = sub_area
+    @application = application
+    @utr = utr
+    @fqdn = fqdn
+    @host_name = host_name
+    @ip_address = ip_address
+    @operating_system = operating_system
+    @server_category = server_category
+    @server_environment = server_environment
+    @host_key = host_key
+    @country = country
+  end
 
-  desc 'Describe asset here'
-  arg_name 'Describe arguments to asset here'
-  command :asset do |c|
-    c.desc 'Describe a switch to asset'
-    c.switch :s
+  def site_name
+    ['', country_code, business_unit, sub_area, application, utr].join(':')
+  end
 
-    c.desc 'Describe a flag to asset'
-    c.default_value 'default'
-    c.flag :f
-    c.action do |_global_options, _options, _args|
-      # Your command logic specific to 'asset' here
-      assets = [
-        CmdbAsset.new(
-          id: 100,
-          country_code: 'cd',
-          business_unit: 'bu',
-          sub_area: 'sa',
-          application: 'ewallet',
-          utr: 'UTR01966',
-          fqdn: 'fqdn.co.za',
-          host_name: 'fqdn',
-          ip_address: '172.16.19.66',
-          operating_system: 'ubuntu',
-          server_environment: 'linux',
-          server_category: 'linux',
-          host_key: 'xxxx',
-          country: 'DRC'
-        ),
-        CmdbAsset.new(
-          id: 200,
-          country_code: 'mw',
-          business_unit: 'bu',
-          sub_area: 'sa',
-          application: 'atm',
-          utr: 'UTR01966',
-          fqdn: 'fqdn.co.za',
-          host_name: 'fqdn',
-          ip_address: '198.172.19.66',
-          operating_system: 'ubuntu',
-          server_environment: 'linux',
-          server_category: 'linux',
-          host_key: 'xxxx',
-          country: 'Malawi'
-        ),
-        CmdbAsset.new(
-          id: 300,
-          country_code: 'bw',
-          business_unit: 'bu',
-          sub_area: 'sa',
-          application: 'forex',
-          utr: 'UTR01986',
-          fqdn: 'fqdn.co.za',
-          host_name: 'fqdn',
-          ip_address: '10.12.19.66',
-          operating_system: 'ubuntu',
-          server_environment: 'linux',
-          server_category: 'linux',
-          host_key: 'xxxx',
-          country: 'Botswana'
-        )
-      ]
-      puts 'list assets'
-      assets.each do |asset|
-        puts asset
-      end
-    end
+  def self.from_csv(row)
+    CmdbAsset.new(id: row[:id],
+                  country_code: row[:country_code],
+                  country: row[:country],
+                  business_unit: row[:business_unit],
+                  sub_area: row[:sub_area],
+                  application: row[:application],
+                  utr: row[:utr],
+                  fqdn: row[:fqdn],
+                  ip_address: row[:ip_address],
+                  host_name: row[:host_name],
+                  host_key: row[:host_key],
+                  operating_system: row[:operating_system],
+                  server_environment: row[:server_environment],
+                  server_category: row[:server_category])
+  end
+
+  def to_s
+    [id, site_name, fqdn, ip_address].join ','
   end
 end
