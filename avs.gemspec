@@ -10,7 +10,7 @@ spec = Gem::Specification.new do |s|
   s.summary = 'A description of your project'
   s.files = `git ls-files`.split(' ')
   s.require_paths << 'lib'
-  s.extra_rdoc_files = ['README.rdoc', 'avs.rdoc']
+  s.extra_rdoc_files = ['README.adoc', 'avs.rdoc']
   s.rdoc_options << '--title' << 'avs' << '--main' << 'README.rdoc' << '-ri'
   s.bindir = 'bin'
   s.executables << 'avs'
