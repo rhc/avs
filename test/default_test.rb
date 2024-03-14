@@ -1,12 +1,10 @@
-require_relative "test_helper"
+# frozen_string_literal: true
+require_relative 'test_helper'
 
 class DefaultTest < Minitest::Test
+  def setup; end
 
-  def setup
-  end
-
-  def teardown
-  end
+  def teardown; end
 
   def test_the_truth
     assert true

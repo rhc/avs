@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CmdbAsset
   attr_accessor :id,
                 :country_code,
