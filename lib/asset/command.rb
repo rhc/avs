@@ -3,9 +3,10 @@
 require_relative 'model'
 require_relative 'fixture'
 
-def fetch_fixtures
-  []
-end
+class App
+  extend GLI::App
+
+  desc 'Manage assets'
   arg_name 'Describe arguments to asset here'
   command :assets do |c|
     c.desc 'Describe a switch to asset'
@@ -17,7 +18,6 @@ end
     c.action do |_global_options, _options, _args|
       # Your command logic specific to 'asset' here
       assets = fetch_fixtures
-      puts 'list assets'
       assets.each do |asset|
         puts asset
       end
