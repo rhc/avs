@@ -1,0 +1,5 @@
+= avs
+
+Generate this with
+    avs _doc
+After you have described your command line interface

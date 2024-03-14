@@ -1,0 +1,162 @@
+= avs
+Christian Kyony <ckyony@changamuka.com>
+v0.0.1, 2024-03.14 
+
+:uri-freesoftware: https://www.gnu.org/philosophy/free-sw.html
+
+
+
+
+== For security engineers
+who need to interact with a Rapid7 Nexpose console,
+the *avs* gem is a command line utility
+that manage (e.g. create, list, update, and remove) the following entities:
+  - sites,
+  - scans,
+  - assets,
+  - asset groups,
+  - reports,
+  - vulnerabilities
+  - etc...
+
+
+
+== Personal scratch
+
+I need to automate the creation of hundreds sites and reports.
+
+
+== Installation
+
+Simply run the command below
+
+----
+$ gem install avs
+----
+
+
+== Usage
+
+You can get help on available commands.
+
+----
+NAME
+    nsc - CLI to interface with Nexpose Security Console
+
+SYNOPSIS
+    nsc [global options] command [command options] [arguments...]
+
+VERSION
+    0.0.2
+
+GLOBAL OPTIONS
+    --help    - Show this message
+    --version - Display the program version
+
+COMMANDS
+    assets         - Manage assets
+    bulk_delete    - Bulk delete assets with unknown OS
+    connect, login - Verify connection to the server
+    groups         - Manage asset groups
+    help           - Shows a list of commands or help for one command
+    reports        - Manage reports
+    sites          - Manage sites
+----
+
+// List all active scans
+//
+//   nsc scan list
+//
+// Run an adhoc sql query and export via csv
+//
+//   nsc reports --sql "select * from dim_asset"
+//
+// or for more complex sql queries, put the sql into a file and run
+//
+//   nsc reports --sqlfile ./new_assets.sql
+//
+//
+// List all reports defined
+//
+//   nsc reports
+//
+// Request the console's version details
+//
+//   nsc console commands "ver"
+//
+// Run an adhoc scan for a single ip or network cidr-noted range ( --id )
+//
+//   nsc scans create --range 192.168.42.103/32
+//
+// how to add a new custom role for configuration within the console ui, based on a copy of existinsc role
+//
+//   nsc roles -n security-manager --description "New Role Name" --newname new-short-name
+//
+// how to add a new user, with default password of "nxpassword" until moved to yaml config is supported
+//
+//   nsc users create  --name <username> --fullname "Full Name"
+//
+// how to export packaged scan data in a single zip file
+//
+//   nsc scan  --update --scanpath ./ --action export --id <scan id>
+//
+
+== Configuration
+
+----
+# ~/lab.yaml consists of the following:
+
+config:
+   server: 10.10.10.10
+   port: 3780
+   user: nxuser
+   password: password
+----
+
+
+== Development
+
+Checkout the github repository
+
+  git clone https://github.com/rhc/avs
+
+Access the source code folder directory.
+
+  $ cd avs
+
+Install dependencies
+
+  bin/setup
+
+Run the tests
+
+  rake test
+
+Experiment with the code under development
+
+  run bin/console
+
+Install this gem onto your local machine
+
+  bundle exec rake install
+
+Release a new version
+
+  gem bump
+  gem release
+
+== Contributing
+
+In the spirit of {uri-freesoftware}[free software],
+everyone is encouraged to help improve this project.
+
+If you discover errors or omissions in the source code, documentation, or website content,
+please don’t hesitate to submit an issue or open a pull request with a fix. New contributors are always welcome!
+
+== License
+
+The gem is available as open source under the terms of the
+http://opensource.org/licenses/MIT[MIT License].
+
+
+
