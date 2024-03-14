@@ -1,30 +1,30 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
-require 'gli'
-require_relative '../lib/avs'
+
+require_relative 'model'
+require_relative 'fixture'
 
 class App
   extend GLI::App
 
-  program_desc 'Describe your application here'
+  desc 'Manage assets'
+  arg_name 'Describe arguments to asset here'
+  command :assets do |c|
+    c.desc 'Describe a switch to asset'
+    c.switch :s
 
-  version Avs::VERSION
-
-  subcommand_option_handling :normal
-  arguments :strict
-
-  desc 'Describe some switch here'
-  switch %i[s switch]
-
-  desc 'Describe some flag here'
-  default_value 'the default'
-  arg_name 'The name of the argument'
-  flag %i[f flagname]
-
-  desc 'Manage vulnerabilities'
-  arg_name 'Describe arguments to vulnerability here'
-  command :vulnerability do |c|
+    c.desc 'Describe a flag to asset'
+    c.default_value 'default'
+    c.flag :f
     c.action do |_global_options, _options, _args|
+      # Your command logic specific to 'asset' here
+      assets = fetch_fixtures
+      puts 'list assets'
+      assets.each do |asset|
+        puts asset
+      end
+    end
+  end
+end
       puts 'vulnerability command ran'
     end
   end

@@ -1,3 +1,0 @@
-Exclude:
-  - '**/command.rb'
-    - Metrics/BlockLength
