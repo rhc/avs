@@ -6,6 +6,7 @@ require 'json'
 require 'uri'
 require 'base64'
 require 'openssl'
+require_relative '../../domain/api'
 
 class InsightVMApi
   attr_reader :http, :base_auth, :base_url

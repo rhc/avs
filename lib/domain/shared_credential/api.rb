@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative '../model'
+require_relative 'model'
 
 class InsightVMApi
   def fetch_cyberark(country)

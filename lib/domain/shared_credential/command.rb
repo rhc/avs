@@ -11,27 +11,21 @@ class App
     c.desc 'List credentials'
     c.command :list do |l|
       l.action do |_global_options, _options, _args|
-        credentials = App.fetch_credentials
-        credentials.each { |credential| puts credential }
+        App.api.fetch_shared_credentials { |credential| puts credential }
       end
     end
     # c.default_command :help
-    c.desc 'Delete shared credentials'
-    c.command :delete do |d|
-      d.desc 'Specify source to fetch credentials form'
-      d.default_value 'api'
-      d.flag [:id]
+    # c.desc 'Delete shared credentials'
+    # c.command :delete do |d|
+    #   d.desc 'Shared credential unique ID'
+    #   d.flag [:id]
 
-      d.action do |_global_options, options, _args|
-        id = options[:id]
-        puts "Fetch credentials from  #{id} ..."
-        # credentials = fetch_credentials(from: source)
-        # credentials.each { |credential| puts credential }
-      end
-    end
-  end
-
-  def self.fetch_credentials()
-    credentials = api.fetch_credentials
+    #   d.action do |_global_options, options, _args|
+    #     id = options[:id]
+    #     puts "Delete credential ##{id} ..."
+    #     # credentials = fetch_credentials(from: source)
+    #     # credentials.each { |credential| puts credential }
+    #   end
+    # end
   end
 end
