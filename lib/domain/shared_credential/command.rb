@@ -4,8 +4,6 @@ require_relative 'model'
 require_relative 'fixture'
 
 class App
-  extend GLI::App
-
   desc 'Manage shared credentials'
   command :shared_credentials do |c|
     c.desc 'List credentials'
@@ -14,7 +12,17 @@ class App
         App.api.fetch_shared_credentials { |credential| puts credential }
       end
     end
-    # c.default_command :help
+
+    c.desc 'Get credential by id'
+    c.command :get do |g|
+      g.desc 'Credential unique id'
+      g.flag :id
+      g.action do |_global_options, options, _args|
+        id = options[:id]
+        credential = App.api.fetch_shared_credential(id)
+        puts credential.to_json
+      end
+    end
     # c.desc 'Delete shared credentials'
     # c.command :delete do |d|
     #   d.desc 'Shared credential unique ID'
