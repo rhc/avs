@@ -1,4 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'shared_credential/db'
-
+Dir.glob(File.join(__dir__, 'domain', '**', 'db.rb')).each do |file|
+  require_relative file
+end

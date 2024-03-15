@@ -4,6 +4,7 @@
 require_relative 'model'
 
 class InsightVMApi
+
   def fetch_scan_engine_pools
     fetch_all('/scan_engine_pools') do |resource|
       yield ScanEnginePool.from_json(resource)
