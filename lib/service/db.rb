@@ -13,12 +13,6 @@ class Db
     @port = port
   end
 
-  def fetch_cmdb
-    fetch_view('utr_asset_view') do |row|
-      CmdbAsset.from_csv(row)
-    end
-  end
-
   private
 
   def fetch_view(view, &block)

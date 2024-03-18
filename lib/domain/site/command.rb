@@ -4,7 +4,7 @@ require_relative 'model'
 require_relative 'fixture'
 
 class App
-  desc 'Manage site'
+  desc 'Manage sites'
   command :site do |c|
     c.desc 'Filter sites by name (contains pattern)'
     c.flag [:filter]
