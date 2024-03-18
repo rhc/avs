@@ -56,5 +56,12 @@ class App
         App.api.delete_site(id:)
       end
     end
+
+    c.desc 'Delete all UTR sites'
+    c.command :delete_utr_sites do |d|
+      d.action do |_global_options, _options, _args|
+        App.api.delete_utr_sites
+      end
+    end
   end
 end

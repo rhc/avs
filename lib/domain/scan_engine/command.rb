@@ -11,6 +11,7 @@ class App
       l.desc 'Filter scan engines by name (contains pattern)'
       l.flag [:filter]
 
+      # TODO: l.desc 'Status (all|up|down)'
       l.action do |_global_options, options, _args|
         filter = options[:filter].downcase
         App.api.fetch_scan_engines do |engine|

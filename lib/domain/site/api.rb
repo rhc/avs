@@ -18,6 +18,21 @@ class InsightVMApi
     sites
   end
 
+  def delete_utr_sites
+    puts 'Fetching UTR sites can take up to 5 minutes, patience ...'
+    sites = fetch_utr_sites
+    # TODO: ask for confirmation
+    # TODO: add progress bar
+    puts "#{sites.count} sites will be deleted. Are you sure?"
+    sites.each do |site|
+      next unless site.utr? # double-check
+
+      puts "Deleting site #{site.name}"
+
+      delete_site(id: site.id)
+    end
+  end
+
   def create_site(
     name:,
     description:,
