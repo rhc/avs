@@ -8,8 +8,14 @@ class App
   command :scan_engines do |c|
     c.desc 'List credentials'
     c.command :list do |l|
-      l.action do |_global_options, _options, _args|
-        App.api.fetch_scan_engines { |engine| puts engine.to_json }
+      l.desc 'Filter scan engines by name (contains pattern)'
+      l.flag [:filter]
+
+      l.action do |_global_options, options, _args|
+        filter = options[:filter].downcase
+        App.api.fetch_scan_engines do |engine|
+          puts engine.to_json if filter.nil? || engine.name.downcase.include?(filter)
+        end
       end
     end
 
