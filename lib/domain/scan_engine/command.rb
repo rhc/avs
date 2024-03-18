@@ -5,8 +5,8 @@ require_relative 'fixture'
 
 class App
   desc 'Manage scan engines'
-  command :scan_engines do |c|
-    c.desc 'List credentials'
+  command :scan_engine do |c|
+    c.desc 'List scan engines'
     c.command :list do |l|
       l.desc 'Filter scan engines by name (contains pattern)'
       l.flag [:filter]

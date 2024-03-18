@@ -25,22 +25,6 @@ class App
   arg_name 'The name of the argument'
   flag [:f,:flagname]
 
-  desc 'Manage vulnerabilities'
-  arg_name 'Describe arguments to vulnerability here'
-  command :vulnerabilities do |c|
-    c.action do |global_options,options,args|
-      puts "manage vulns ..."
-    end
-  end
-
-  desc 'Manage solutions'
-  arg_name 'Manage solutions'
-  command :solutions do |c|
-    c.action do |_global_options, _options, _args|
-      puts 'solution command ran'
-    end
-  end
-
   pre do |_global, _command, _options, _args|
     # Pre logic here
     # Return true to proceed; false to abort and not call the

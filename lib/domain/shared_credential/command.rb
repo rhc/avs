@@ -5,7 +5,7 @@ require_relative 'fixture'
 
 class App
   desc 'Manage shared credentials'
-  command :shared_credentials do |c|
+  command :shared_credential do |c|
     c.desc 'List credentials'
     c.command :list do |l|
       l.action do |_global_options, _options, _args|

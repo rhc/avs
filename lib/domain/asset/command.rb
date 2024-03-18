@@ -8,7 +8,7 @@ class App
 
   desc 'Manage assets'
   arg_name 'Describe arguments to asset here'
-  command :assets do |c|
+  command :asset do |c|
     c.desc 'Describe a switch to asset'
     c.switch :s
 

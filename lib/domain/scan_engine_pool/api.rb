@@ -4,40 +4,16 @@
 require_relative 'model'
 
 class InsightVMApi
-
   def fetch_scan_engine_pools
     fetch_all('/scan_engine_pools') do |resource|
       yield ScanEnginePool.from_json(resource)
     end
   end
 
-  def fetch_scan_engines
-    fetch_all('/scan_engines') do |resource|
-      yield ScanEngine.from_json(resource)
-    end
-  end
-
-  def all_scan_engines
-    engines = []
-    fetch_scan_engines do |e|
-      engines << e
-    end
-    engines
-  end
-
   # return scan engines that went from up to down
   # given the previous status in a hash
   # if the previous status is not known, assume it was up
   #
-  def scan_engines_from_up_to_down(engines, previous_status)
-    downs = engines.select(&:down?).reject(&:rapid7_hosted?)
-    downs.select do |site|
-      status = previous_status[site.id]
-      status.nil? ? true : status
-    end
-  end
-
-  # TODO: rename Swaziland to eSwatini
   # TODO fetch pools from API
   def fetch_country_scan_engine_pools(country)
     pools = [
