@@ -11,11 +11,18 @@ class App
       l.desc 'Filter scan engines by name (contains pattern)'
       l.flag [:filter]
 
+      l.desc 'Only display scan engines that are currently up'
+      l.switch [:up]
+
       # TODO: l.desc 'Status (all|up|down)'
       l.action do |_global_options, options, _args|
-        filter = options[:filter].downcase
+        filter = options[:filter]&.downcase
+        up = options[:up]
         App.api.fetch_scan_engines do |engine|
-          puts engine.to_json if filter.nil? || engine.name.downcase.include?(filter)
+          next if filter && !engine.name.downcase.include?(filter)
+          next if up && up != engine.up?
+
+          puts engine.to_json
         end
       end
     end

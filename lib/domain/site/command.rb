@@ -51,7 +51,7 @@ class App
     c.desc 'Create sites for business unit'
     c.command :new do |n|
       n.desc 'Business unit'
-      n.flag [:bu, :business_unit, 'business-unit']
+      n.flag [:bu, :business_unit, 'business-unit'], required: true
 
       n.action do |_global_options, options, _args|
         business_unit = options[:business_unit]
