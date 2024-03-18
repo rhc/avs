@@ -8,7 +8,10 @@ class App
   command :site do |c|
     c.desc 'Filter sites by name (contains pattern)'
     c.flag [:filter]
+    c.desc 'Unique ID'
+    c.flag :id
     c.desc 'List sites'
+
     c.command :list do |l|
       l.desc 'UTR site only'
       l.switch [:utr]
@@ -36,27 +39,22 @@ class App
         end
       end
     end
+
     c.desc 'Get site by id'
     c.command :get do |g|
-      g.desc 'ID'
-      g.flag :id
       g.action do |_global_options, options, _args|
-        id = options[:id]
-        credential = App.api.fetch_shared_credential(id)
-        puts credential.to_json
+        id = options[GLI::Command::PARENT][:id]
+        puts "TODO get site id #{id}"
       end
     end
-    # c.desc 'Delete scan engines'
-    # c.command :delete do |d|
-    #   d.desc 'scan engine unique ID'
-    #   d.flag [:id]
 
-    #   d.action do |_global_options, options, _args|
-    #     id = options[:id]
-    #     puts "Delete credential ##{id} ..."
-    #     # credentials = fetch_credentials(from: source)
-    #     # credentials.each { |credential| puts credential }
-    #   end
-    # end
+    c.desc 'Delete site'
+    c.command :delete do |d|
+      d.action do |_global_options, options, _args|
+        id = options[GLI::Command::PARENT][:id]
+        # TODO: add confirmation here
+        App.api.delete_site(id:)
+      end
+    end
   end
 end
