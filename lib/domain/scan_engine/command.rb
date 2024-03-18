@@ -27,6 +27,14 @@ class App
       end
     end
 
+    c.desc 'Send email when an engine is down'
+    c.command :alert_on_down do |g|
+      g.action do |_global_options, _options, _args|
+        # TODO
+        puts '... alert_on_down'
+      end
+    end
+
     c.desc 'Get scan engine by id'
     c.command :get do |g|
       g.desc 'Scan engine ID'
