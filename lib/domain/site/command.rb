@@ -48,6 +48,18 @@ class App
       end
     end
 
+    c.desc 'Create sites for business unit'
+    c.command :new do |n|
+      n.desc 'Business unit'
+      n.flag [:bu, :business_unit, 'business-unit']
+
+      n.action do |_global_options, options, _args|
+        business_unit = options[:business_unit]
+        puts 'Fetching CMDB assets ...'
+        cmdb_assets = App.db.fetch_cmdb_assets
+        App.api.create_utr_sites_for(business_unit:, cmdb_assets:)
+      end
+    end
     c.desc 'Delete site'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|

@@ -3,7 +3,7 @@
 require 'csv'
 
 class Db
-  def fetch_cmdb_asset
+  def fetch_cmdb_assets
     fetch_view('utr_asset_view') do |row|
       CmdbAsset.from_csv(row)
     end
