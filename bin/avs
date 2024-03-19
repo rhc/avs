@@ -6,6 +6,7 @@ require 'gli'
 require_relative '../lib/avs'
 require_relative '../lib/service/db'
 require_relative '../lib/service/api/insightvm'
+require_relative '../lib/service/mail'
 
 class App
   extend GLI::App
@@ -58,6 +59,10 @@ class App
   # TODO use the ENV for host, db, port
   def self.db
     @db ||= Db.new(host: '127.0.0.1', db: 'avs', user: 'avs',port: 5433)
+  end
+
+  def self.mail
+    MailService.instance
   end
 end
 

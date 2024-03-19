@@ -4,7 +4,6 @@
 require_relative 'model'
 
 class InsightVMApi
-
   def fetch_scan_engine_pools
     fetch_all('/scan_engine_pools') do |resource|
       yield ScanEnginePool.from_json(resource)
@@ -34,6 +33,31 @@ class InsightVMApi
     downs.select do |site|
       status = previous_status[site.id]
       status.nil? ? true : status
+    end
+  end
+
+  def engine_last_status_from(csv_file)
+    result = {}
+    csv_data = CSV.read(csv_file, headers: true)
+    sorted_data = csv_data.sort_by { |row| row['timestamp'] }
+
+    sorted_data.each do |row|
+      engine_id = row['engine_id'].to_i
+      status = row['up'] == 'true'
+      result[engine_id] = status
+    end
+    result
+  end
+
+  # append the new engine status in the csv_file
+  # only if it is different from the previous status
+  def append_new_status(engines:, csv_file:, previous_status:)
+    CSV.open(csv_file, 'a') do |csv|
+      engines.each do |engine|
+        next if previous_status[engine.id] == engine.up?
+
+        csv << [Time.now.strftime('%Y-%m-%dT%H:%M'), engine.id, engine.up?.to_s]
+      end
     end
   end
 
