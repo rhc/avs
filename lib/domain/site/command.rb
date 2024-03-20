@@ -51,10 +51,14 @@ class App
     c.desc 'Create sites for business unit'
     c.command :new do |n|
       n.desc 'Business unit'
-      n.flag [:bu, :business_unit, 'business-unit'], required: true
+      n.flag [:bu, :business_unit, 'business-unit']
 
       n.action do |_global_options, options, _args|
         business_unit = options[:business_unit]
+        if business_unit.nil?
+          puts 'Cannot create a new site without the business unit name.'
+          exit
+        end
         puts 'Fetching CMDB assets ...'
         cmdb_assets = App.db.fetch_cmdb_assets
         App.api.create_utr_sites_for(business_unit:, cmdb_assets:)

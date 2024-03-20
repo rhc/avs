@@ -20,12 +20,14 @@ class CmdbAsset
                 :matching_ip_address,
                 :is_subnet_in_server_range,
                 :reported_decommissioned,
-                :onboard_asset
+                :onboard_asset,
+                :business_unit_code
 
   def initialize(
     id:,
     country_code:,
     business_unit:,
+    business_unit_code:,
     sub_area:,
     application:,
     utr:,
@@ -48,6 +50,7 @@ class CmdbAsset
     @id = id
     @country_code = country_code
     @business_unit = business_unit
+    @business_unit_code = business_unit_code
     @sub_area = sub_area
     @application = application
     @utr = utr
@@ -72,7 +75,7 @@ class CmdbAsset
   end
 
   def site_name
-    ['', country_code, business_unit, sub_area, application, utr].join(':')
+    ['', country_code, business_unit_code, sub_area, application, utr].join(':')
   end
 
   def self.from_csv(row)
@@ -81,6 +84,7 @@ class CmdbAsset
       country_code: row[:country_code],
       country: row[:country],
       business_unit: row[:business_unit],
+      business_unit_code: row[:business_unit_code],
       sub_area: row[:sub_area],
       application: row[:application],
       utr: row[:utr],

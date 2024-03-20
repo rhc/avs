@@ -28,7 +28,7 @@ class App
     c.command :from_cmdb do |ldb|
       ldb.action do |_global_options, options, _args|
         filter = options[GLI::Command::PARENT][:filter]&.downcase
-        App.db.fetch_cmdb_asset do |asset|
+        App.db.fetch_cmdb_assets do |asset|
           next if filter && !asset.host_name.downcase.include?(filter)
 
           puts asset.to_json
