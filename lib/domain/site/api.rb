@@ -45,7 +45,7 @@ class InsightVMApi
     excluded_asset_group_ids: []
   )
     # Construct the request body
-    site_params = {
+    params = {
       name:,
       description:,
       importance:,
@@ -68,24 +68,29 @@ class InsightVMApi
         }
       }
     }
-    result = post('/sites', site_params)
+    result = post('/sites', params)
     result&.dig('id')
   end
 
-  def create_utr_sites_for(business_unit:, cmdb_assets:)
+  def create_utr_sites_for(
+    business_unit:, cmdb_assets:, cached_tags: {}
+  )
     assets = cmdb_assets.select { |asset| asset.business_unit == business_unit }
     site_names = assets.map(&:site_name).uniq
     site_names.each do |site_name|
       create_utr_site_from(
         site_name:,
-        cmdb_assets: assets
+        cmdb_assets: assets,
+        cached_tags:
       )
     end
   end
 
   # return site.id if success
   # only return the onboard assets
-  def create_utr_site_from(site_name:, cmdb_assets:)
+  def create_utr_site_from(
+    site_name:, cmdb_assets:, cached_tags: {}
+  )
     assets = cmdb_assets.select { |asset| asset.site_name == site_name }
                         .select(&:onboard?)
 
@@ -111,11 +116,27 @@ class InsightVMApi
     )
     return if site_id.nil?
 
+    # add site credential
     shared_credential = fetch_cyberark(country)
-    puts "Creating CyberArk #{shared_credential[:name]}"
+    puts "Add CyberArk credential #{shared_credential[:name]}"
     credential_id = shared_credential[:id]
     add_site_shared_credentials(site_id:, credential_id:)
-    site_id
+
+    # tag assets with business unit code, sub_area, app + utr,
+    tag_names = assets.first.utr_tag_names
+    tags = tag_names.map do |tag_name|
+      puts "Add tag #{tag_name}"
+      get_or_create_tag(name: tag_name, cached_tags:)
+    end
+    tag_ids = tags.map(&:id)
+
+    add_utr_tags(site_id:, tag_ids:)
+  end
+
+  def add_utr_tags(site_id:, tag_ids:)
+    tag_ids.each do |tag_id|
+      put("/sites/#{site_id}/tags/#{tag_id}", nil)
+    end
   end
 
   def delete_site(id:)

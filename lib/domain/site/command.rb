@@ -48,6 +48,22 @@ class App
       end
     end
 
+    c.desc 'Add tag to site'
+    c.command :add_tag do |at|
+      at.flag [:tag_name], desc: 'Tag Name'
+      at.action do |_global_options, options, _args|
+        id = options[GLI::Command::PARENT][:id]
+        tag_name = options[:tag_name]
+        if tag_name.nil?
+          puts 'Tag name is required'
+          exit
+        end
+        tag = App.api.get_or_create_tag(name: tag_name)
+        puts "Tag #{tag.to_json}"
+        App.api.add_utr_tags(site_id: id, tag_ids: [tag.id])
+      end
+    end
+
     c.desc 'Create sites for business unit'
     c.command :new do |n|
       n.desc 'Business unit'

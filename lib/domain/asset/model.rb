@@ -78,6 +78,11 @@ class CmdbAsset
     ['', country_code, business_unit_code, sub_area, application, utr].join(':')
   end
 
+  def utr_tag_names
+    app_utr = [application, utr].join ' - '
+    [business_unit_code, sub_area, app_utr, country]
+  end
+
   def self.from_csv(row)
     CmdbAsset.new(
       id: row[:id],
