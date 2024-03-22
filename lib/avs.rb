@@ -6,7 +6,7 @@ require 'avs/version'
 # you just need to require this one file in your bin file
 class App
   extend GLI::App
-  synopsis_format :terminal
+  synopsis_format :compact
 end
 
 Dir.glob(File.join(__dir__, 'domain', '**', 'command.rb')).each do |file|

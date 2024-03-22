@@ -93,16 +93,21 @@ class InsightVMApi
   end
 
   def create_utr_sites_for(
-    business_unit:, cmdb_assets:, cached_tags: {}
+    business_unit:,
+    cmdb_assets:,
+    cached_tags: {},
+    starts_discovery: true
   )
     assets = cmdb_assets.select { |asset| asset.business_unit == business_unit }
     site_names = assets.map(&:site_name).uniq
     site_names.each do |site_name|
-      create_utr_site_from(
+      site_id = create_utr_site_from(
         site_name:,
         cmdb_assets: assets,
         cached_tags:
       )
+      puts "Starts discovery #{starts_discovery}"
+      starts_discovery_scan(site_id:) if starts_discovery
     end
   end
 
@@ -159,6 +164,7 @@ class InsightVMApi
     tag_ids = tags.map(&:id)
 
     add_utr_tags(site_id:, tag_ids:)
+    site_id
   end
 
   def add_utr_tags(site_id:, tag_ids:)

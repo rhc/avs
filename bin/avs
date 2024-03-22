@@ -2,11 +2,17 @@
 
 # frozen_string_literal: true
 
+require 'dotenv'
+env_path = File.expand_path('.env', __dir__)
+Dotenv.load(env_path)
+
+
 require 'gli'
 require_relative '../lib/avs'
 require_relative '../lib/service/db'
 require_relative '../lib/service/api/insightvm'
 require_relative '../lib/service/mail'
+
 
 class App
   extend GLI::App
