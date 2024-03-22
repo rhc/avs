@@ -6,9 +6,9 @@ require_relative 'model'
 class InsightVMApi
   def settings
     {
-      ar_discovery_template_id: 'authentication-test-ssh',
-      za_discovery_template_id: '_-new-template_-discovery-scan-with-credentials-copy',
-      za_deep_dive_scanners: 'South Africa Deep Dive Scanners'
+      ar_discovery_template_id: ENV['AR_DISCOVERY_TEMPLATE_ID'],
+      za_discovery_template_id: ENV['ZA_DISCOVERY_TEMPLATE_ID'],
+      za_deep_dive_scanners: ENV['ZA_DEEP_DIVE_SCANNERS']
     }
   end
 
