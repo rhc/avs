@@ -4,10 +4,25 @@
 require_relative 'model'
 
 class InsightVMApi
+  def settings
+    {
+      ar_discovery_template_id: 'authentication-test-ssh',
+      za_discovery_template_id: '_-new-template_-discovery-scan-with-credentials-copy',
+      za_deep_dive_scanners: 'South Africa Deep Dive Scanners'
+    }
+  end
+
   def fetch_sites
     fetch_all('/sites') do |resource|
       yield Site.from_json(resource)
     end
+  end
+
+  def fetch_site(id)
+    fetch("/sites/#{id}") do |data|
+      return Site.from_json(data)
+    end
+    nil
   end
 
   def fetch_utr_sites
@@ -21,8 +36,13 @@ class InsightVMApi
   def delete_utr_sites
     puts 'Fetching UTR sites can take up to 5 minutes, patience ...'
     sites = fetch_utr_sites
-    # TODO: ask for confirmation
     # TODO: add progress bar
+    if sites.empty?
+      puts 'No UTR sites were found.'
+      return
+    end
+
+    # TODO: ask for confirmation
     puts "#{sites.count} sites will be deleted. Are you sure?"
     sites.each do |site|
       next unless site.utr? # double-check
@@ -86,6 +106,14 @@ class InsightVMApi
     end
   end
 
+  def fetch_discovery_scan_template_id(country)
+    if country == 'South Africa'
+      settings[:za_discovery_template_id]
+    else
+      settings[:ar_discovery_template_id]
+    end
+  end
+
   # return site.id if success
   # only return the onboard assets
   def create_utr_site_from(
@@ -102,7 +130,7 @@ class InsightVMApi
     scan_engine_pool = fetch_country_scan_engine_pools(country)
     # puts "Scan engine pool #{scan_engine_pool}"
     engine_id = scan_engine_pool[:id]
-    scan_template_id = 'authentication-test-ssh'
+    scan_template_id = fetch_discovery_scan_template_id(country)
     puts '-' * 20
     puts "Creating Site #{site_name}\n #{targets.length} Targets: #{targets}"
     puts '-' * 20
@@ -139,7 +167,18 @@ class InsightVMApi
     end
   end
 
+  def starts_discovery_scan(site_id:)
+    site = fetch_site(site_id)
+    raise "Site ##{siteId} does not exist." if site.nil?
+
+    params = {}
+    post("/sites/#{site_id}/scans", params)
+  end
+
   def delete_site(id:)
+    puts "Delete assets from site #{id}"
+    delete("/sites/#{id}/assets", '')
+    puts "Delete site #{id}"
     delete('/sites', id)
   end
 

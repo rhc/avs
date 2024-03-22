@@ -64,7 +64,7 @@ class InsightVMApi
       # You can parse the response body if needed
       JSON.parse(response.body)
     else
-      puts "Error creating site. Status code: #{response.code}, Response body: #{response.body}"
+      puts "Error with status code: #{response.code}, Response body: #{response.body}"
       nil
     end
   end

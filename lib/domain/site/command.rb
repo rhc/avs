@@ -9,7 +9,7 @@ class App
     c.desc 'Filter sites by name (contains pattern)'
     c.flag [:filter]
     c.desc 'Unique ID'
-    c.flag :id
+    c.flag :id, desc: 'Unique ID', type: Integer
     c.desc 'List sites'
 
     c.command :list do |l|
@@ -80,12 +80,23 @@ class App
         App.api.create_utr_sites_for(business_unit:, cmdb_assets:)
       end
     end
+
     c.desc 'Delete site'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
         id = options[GLI::Command::PARENT][:id]
         # TODO: add confirmation here
         App.api.delete_site(id:)
+      end
+    end
+
+    c.desc 'Starts a discovery scan for the site'
+    c.command :starts_discovery_scan do |d|
+      d.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        raise 'You must specify the site id.' if site_id.nil?
+
+        App.api.starts_discovery_scan(site_id:)
       end
     end
 
