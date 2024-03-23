@@ -25,6 +25,13 @@ class InsightVMApi
     nil
   end
 
+  def fetch_site_by_name(name)
+    fetch_sites do |site|
+      return site if site.name.downcase == name.downcase
+    end
+    nil
+  end
+
   def fetch_utr_sites
     sites = []
     fetch_sites do |site|

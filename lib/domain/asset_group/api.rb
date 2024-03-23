@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'model'
+require_relative '../search_criteria/model'
 
 class InsightVMApi
   def fetch_asset_groups(opts = {})
@@ -56,10 +57,25 @@ class InsightVMApi
     nil
   end
 
+  def create_asset_group_for_site(name:)
+    site = fetch_site_by_name(name)
+    raise "Site #{name} was not found. Cannot create asset group" if site.nil?
+
+    filter = SearchCriteria::Filter.from_site_id(site.id)
+    search_criteria = { match: 'all', filters: [filter.to_json] }
+    create_asset_group(
+      name:,
+      description: "Access group for #{name} site",
+      type: 'dynamic',
+      search_criteria:
+    )
+  end
+
   def create_asset_group(
     name:,
-    description:, type: 'dynamic',
-    search_criteria: {}
+    description: nil,
+    type: 'dynamic',
+    search_criteria: { match: 'all', filters: [] }
   )
     params = {
       description:,
@@ -78,5 +94,18 @@ class InsightVMApi
       result = AssetGroup.from_json(data)
     end
     result
+  end
+
+  def delete_asset_group(id)
+    puts "Delete asset_group #{id}"
+    delete('/asset_groups', id)
+  end
+
+  def delete_asset_group_by_name(name)
+    asset_group = fetch_asset_group_by_name(name)
+    return nil if asset_group.nil?
+
+    puts "Delete asset_group #{name}"
+    delete_asset_group(asset_group.id)
   end
 end

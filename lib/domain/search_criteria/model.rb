@@ -37,6 +37,14 @@ class SearchCriteria
       )
     end
 
+    def self.from_site_id(id)
+      new(
+        field: 'site-id',
+        operator: 'in',
+        values: [id]
+      )
+    end
+
     def to_json(*_options)
       {
         field:,

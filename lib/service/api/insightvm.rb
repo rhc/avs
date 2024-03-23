@@ -15,7 +15,7 @@ class InsightVMApi
   #
   # @param [String]
   # @param [Hash] optional parameters: page, size, type, name, sort
-  def fetch_all(endpoint, opts, &block)
+  def fetch_all(endpoint, opts = {}, &block)
     params = { page: 0, size: 100 }.merge opts
     loop do
       full_url = @base_url.dup
