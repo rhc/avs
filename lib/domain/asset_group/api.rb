@@ -57,15 +57,12 @@ class InsightVMApi
     nil
   end
 
-  def create_asset_group_for_site(name:)
-    site = fetch_site_by_name(name)
-    raise "Site #{name} was not found. Cannot create asset group" if site.nil?
-
-    filter = SearchCriteria::Filter.from_site_id(site.id)
+  def create_asset_group_for(site_id:, site_name:)
+    filter = SearchCriteria::Filter.from_site_id(site_id)
     search_criteria = { match: 'all', filters: [filter.to_json] }
     create_asset_group(
-      name:,
-      description: "Access group for #{name} site",
+      name: site_name,
+      description: "Access group for site #{site_id}",
       type: 'dynamic',
       search_criteria:
     )
@@ -96,16 +93,23 @@ class InsightVMApi
     result
   end
 
+  def delete_asset_group_by(id: nil, name: nil)
+    raise 'Specify either id or name' if id.nil? && name.nil?
+
+    if id
+      delete_asset_group(id)
+    else
+      asset_group = fetch_asset_group_by_name(name)
+      raise "#{name} asset group does not exist" if asset_group.nil?
+
+      delete_asset_group(asset_group.id)
+    end
+  end
+
+  private
+
   def delete_asset_group(id)
     puts "Delete asset_group #{id}"
     delete('/asset_groups', id)
-  end
-
-  def delete_asset_group_by_name(name)
-    asset_group = fetch_asset_group_by_name(name)
-    return nil if asset_group.nil?
-
-    puts "Delete asset_group #{name}"
-    delete_asset_group(asset_group.id)
   end
 end

@@ -113,7 +113,15 @@ class InsightVMApi
         cmdb_assets: assets,
         cached_tags:
       )
-      puts "Starts discovery #{starts_discovery}"
+      if site_id.nil?
+        puts "Cannot create #{site_name} site"
+        next
+      end
+
+      puts "\t Create asset group for #{site_name} site "
+      create_asset_group_for(site_id:)
+
+      puts "\t Starts discovery #{starts_discovery} for #{site_name} site"
       starts_discovery_scan(site_id:) if starts_discovery
     end
   end
@@ -188,7 +196,26 @@ class InsightVMApi
     post("/sites/#{site_id}/scans", params)
   end
 
-  def delete_site(id:)
+  def delete_site_by(id:, name:)
+    raise 'Specify either id or name' if id.nil? && name.nil?
+
+    if id
+      delete_site(id)
+    else
+      site = fetch_site_by_name(name)
+      delete_site(site.id)
+    end
+  end
+
+  def delete_site(id)
+    raise 'Cannot delete site without id' if id.nil?
+
+    site = fetch_site(id)
+    raise "Site #{id} does not exist." if site.nil?
+
+    puts 'Delete asset group with the same name as the site'
+    delete_asset_group_by(name: site.name)
+
     puts "Delete assets from site #{id}"
     delete("/sites/#{id}/assets", '')
     puts "Delete site #{id}"

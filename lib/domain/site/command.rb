@@ -6,10 +6,8 @@ require_relative 'fixture'
 class App
   desc 'Manage sites'
   command :site do |c|
-    c.desc 'Filter sites by name (contains pattern)'
-    c.flag [:filter]
-    c.desc 'Unique ID'
     c.flag :id, desc: 'Unique ID', type: Integer
+    c.flag :name, desc: 'Name'
     c.desc 'List sites'
 
     c.command :list do |l|
@@ -17,10 +15,10 @@ class App
       l.switch [:utr]
 
       l.action do |_global_options, options, _args|
-        filter = options[GLI::Command::PARENT][:filter]&.downcase
+        name = options[GLI::Command::PARENT][:name]&.downcase
         utr = options[:utr]
         App.api.fetch_sites do |site|
-          next if filter && !site.name.downcase.include?(filter)
+          next if name && !site.name.downcase.include?(name)
           next if utr && !site.utr?
 
           puts site.to_json
@@ -92,8 +90,8 @@ class App
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
         id = options[GLI::Command::PARENT][:id]
-        # TODO: add confirmation here
-        App.api.delete_site(id:)
+        name = options[GLI::Command::PARENT][:name]
+        App.api.delete_site_by id:, name:
       end
     end
 

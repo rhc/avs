@@ -42,12 +42,13 @@ class App
 
       n.action do |_global_options, options, _args|
         site_name = options[:site_name]
-        if site_name.nil?
-          puts 'Cannot create a asset_group without a valid name.'
-          exit
-        end
-        asset_group_id = App.api.create_asset_group_for_site(name: site_name)
-        puts 'asset_group was not created' if asset_group_id.nil?
+        raise 'Cannot create a asset_group for a site without a site name.' if site_name.nil?
+
+        site = App.api.fetch_site_by_name(site_name)
+        raise "Cannot find the #{site_name} site" if site.nil?
+
+        asset_group_id = App.api.create_asset_group_for site_id: site.id, site_name: site.name
+        raise 'asset_group was not created' if asset_group_id.nil?
       end
     end
 
@@ -56,11 +57,8 @@ class App
       d.action do |_global_options, options, _args|
         id = options[GLI::Command::PARENT][:id]
         name = options[GLI::Command::PARENT][:name]
-        raise 'You must specify the access group id or name to be deleted' if id.nil? && name.nil?
 
-        App.api.delete_asset_group(id) if id
-
-        App.api.delete_asset_group_by_name(name) if name
+        App.api.delete_asset_group_by(id:, name:)
       end
     end
   end
