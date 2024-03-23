@@ -47,7 +47,7 @@ class InsightVMApi
   end
 
   def fetch_tag_by_name(name)
-    fetch_all('/tags', name:) do |resource|
+    fetch_all('/tags', { name: }) do |resource|
       tag = Tag.from_json(resource)
       return tag if tag.name == name
     end

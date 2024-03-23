@@ -11,13 +11,18 @@ require_relative '../../domain/api'
 class InsightVMApi
   attr_reader :http, :base_auth, :base_url
 
-  def fetch_all(endpoint, name: '', size: 50, &block)
-    page = 0
-
+  # Fetchs all resources
+  #
+  # @param [String]
+  # @param [Hash] optional parameters: page, size, type, name, sort
+  def fetch_all(endpoint, opts, &block)
+    params = { page: 0, size: 100 }.merge opts
     loop do
       full_url = @base_url.dup
       full_url.path += endpoint
-      full_url.query = URI.encode_www_form({ page:, size:, name: })
+      full_url.query = URI.encode_www_form(
+        params
+      )
       request = Net::HTTP::Get.new(full_url)
       request['Authorization'] = @base_auth
       response = @http.request(request)
@@ -30,9 +35,9 @@ class InsightVMApi
 
       # Check if this is the last page
       pages = json_response['page']&.[]('totalPages') || 0
-      break if page >= pages
+      break if params[:page] >= pages
 
-      page += 1
+      params[:page] += 1
     end
   end
 
