@@ -6,10 +6,8 @@ require_relative 'model'
 class App
   desc 'Manage asset groups'
   command :asset_group do |c|
-    c.desc 'name'
-    c.flag [:name]
-    c.desc 'type (static or dynamic)'
-    c.flag [:type]
+    c.flag [:name], desc: 'name'
+    c.flag [:type], desc: 'Type (static or dynamic)'
     c.flag :id, desc: 'asset group ID'
     c.desc 'List asset groups'
     c.command :list do |l|
@@ -37,18 +35,17 @@ class App
 
     c.desc 'Create asset_group for a site'
     c.command :new do |n|
-      n.desc 'Site'
-      n.flag ['site-name', :site_name]
+      n.flag ['site-name', :site_name],
+             desc: 'Site', required: true
 
       n.action do |_global_options, options, _args|
         site_name = options[:site_name]
-        raise 'Cannot create a asset_group for a site without a site name.' if site_name.nil?
 
         site = App.api.fetch_site_by_name(site_name)
         raise "Cannot find the #{site_name} site" if site.nil?
 
         asset_group_id = App.api.create_asset_group_for site_id: site.id, site_name: site.name
-        raise 'asset_group was not created' if asset_group_id.nil?
+        raise 'Asset group was not created' if asset_group_id.nil?
       end
     end
 

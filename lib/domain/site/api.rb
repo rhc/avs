@@ -44,10 +44,7 @@ class InsightVMApi
     puts 'Fetching UTR sites can take up to 5 minutes, patience ...'
     sites = fetch_utr_sites
     # TODO: add progress bar
-    if sites.empty?
-      puts 'No UTR sites were found.'
-      return
-    end
+    raise 'No UTR sites were found.' if sites.empty?
 
     # TODO: ask for confirmation
     puts "#{sites.count} sites will be deleted. Are you sure?"
@@ -56,7 +53,7 @@ class InsightVMApi
 
       puts "Deleting site #{site.name}"
 
-      delete_site(id: site.id)
+      delete_site(site.id)
     end
   end
 

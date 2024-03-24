@@ -11,8 +11,7 @@ class App
     c.desc 'List sites'
 
     c.command :list do |l|
-      l.desc 'UTR site only'
-      l.switch [:utr]
+      l.switch [:utr], desc: 'UTR site only'
 
       l.action do |_global_options, options, _args|
         name = options[GLI::Command::PARENT][:name]&.downcase
@@ -29,9 +28,9 @@ class App
     c.desc 'List UTR sites from cmdb'
     c.command :utr_from_cmdb do |ldb|
       ldb.action do |_global_options, options, _args|
-        filter = options[GLI::Command::PARENT][:filter]&.downcase
+        name = options[GLI::Command::PARENT][:name]&.downcase
         App.db.fetch_utr_site_from_cmdb do |site|
-          next if filter && !site.name.downcase.include?(filter)
+          next if name && !site.name.downcase.include?(name)
 
           puts site.to_json
         end
@@ -86,7 +85,7 @@ class App
       end
     end
 
-    c.desc 'Delete site'
+    c.desc 'Delete site by id or name'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
         id = options[GLI::Command::PARENT][:id]

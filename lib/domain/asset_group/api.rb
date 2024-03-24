@@ -100,9 +100,7 @@ class InsightVMApi
       delete_asset_group(id)
     else
       asset_group = fetch_asset_group_by_name(name)
-      raise "#{name} asset group does not exist" if asset_group.nil?
-
-      delete_asset_group(asset_group.id)
+      delete_asset_group(asset_group.id) if asset_group
     end
   end
 

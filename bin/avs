@@ -6,13 +6,11 @@ require 'dotenv'
 env_path = File.expand_path('.env', __dir__)
 Dotenv.load(env_path)
 
-
 require 'gli'
 require_relative '../lib/avs'
 require_relative '../lib/service/db'
 require_relative '../lib/service/api/insightvm'
 require_relative '../lib/service/mail'
-
 
 class App
   extend GLI::App
@@ -23,15 +21,7 @@ class App
 
   subcommand_option_handling :normal
   arguments :strict
-  synopsis_format :compact
-
-  desc 'Describe some switch here'
-  switch [:s,:switch]
-
-  desc 'Describe some flag here'
-  default_value 'the default'
-  arg_name 'The name of the argument'
-  flag [:f,:flagname]
+  # synopsis_format :compact
 
   pre do |_global, _command, _options, _args|
     # Pre logic here
