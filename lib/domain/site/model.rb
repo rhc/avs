@@ -28,6 +28,22 @@ class Site
     [id, name, scan_engine, scan_template].join ','
   end
 
+  def scan_template_id
+    return nil unless utr?
+
+    if name.include?(':za:')
+      '_-sa-ca-_100_-_-pps_min-2000-_-max-15000-_--_-full-audit-without-web-spider'
+    else
+      '_-angola-ca-_100_-_-pps_min-450-_-max-450-_--_-full-audit-without-web-spider-copy'
+    end
+  end
+
+  def utr_digits
+    utr_pattern = /:UTR(\d{5})$/
+    digits = name.match(utr_pattern)
+    digits ? digits[1].to_i : 0
+  end
+
   # returns true if the site ends with _UTR followed by 5 digits
   def utr?
     # Define the regular expression pattern

@@ -77,6 +77,43 @@ class App
       end
     end
 
+    c.desc 'Add weekly schedule to UTR site'
+    c.command :schedule_utr do |s|
+      s.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        raise 'The site id is required' if site_id.nil?
+
+        schedule_id = App.api.create_utr_site_schedule(
+          site_id:
+        )
+        puts 'Schedule created' unless schedule_id.nil?
+      end
+    end
+
+    c.desc 'Add weekly schedule to site'
+    c.command :schedule do |s|
+      s.flag [:every], desc: 'Day of the week'
+      s.flag [:at], desc: 'Hour', type: Integer
+      s.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        raise 'The site id is required' if site_id.nil?
+
+        every = options[:every]
+        at = options[:at]
+        if every.nil?
+          puts 'The day of the week is required'
+          exit
+        end
+        schedule_id = App.api.create_weekly_scan(
+          day_of_week: every,
+          start_time: at,
+          duration_in_hours: 2,
+          site_id:
+        )
+        puts 'Schedule created' unless schedule_id.nil?
+      end
+    end
+
     c.desc 'Create sites for business unit'
     c.command :new do |n|
       n.flag [:bu, :business_unit, 'business-unit'], desc: 'Business unit'

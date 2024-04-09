@@ -23,8 +23,9 @@ class InsightVMApi
     start_time:,
     duration_in_hours:,
     site_id:,
-    scan_engine_id:,
-    scan_template_id:
+    scan_name: nil,
+    scan_engine_id: nil,
+    scan_template_id: nil
   )
     now = DateTime.now
     year = now.year
@@ -36,14 +37,15 @@ class InsightVMApi
       every: 'week',
       day_of_week:,
       interval: 1
-    ).to_json
+    )
     create_scan_schedule(
       site_id:,
-      duration: "PT#{duration_in_hours}",
+      duration: "PT#{duration_in_hours}H",
       scan_engine_id:,
       scan_template_id:,
       repeat:,
-      start:
+      start:,
+      scan_name:
     )
   end
 

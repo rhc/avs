@@ -118,11 +118,51 @@ class InsightVMApi
       puts "\tCreate asset group: #{site_name}"
       create_asset_group_for(site_id:, site_name:)
 
+      puts "\tSchedule the scan"
+      # TODO
+
       next unless starts_discovery
 
       puts "\tStart discovery scan"
       starts_discovery_scan(site_id:)
     end
+  end
+
+  # return day of week and starts Time
+  # of scan ScanSchedule
+  # given the UTR digits
+  def scan_slot(utr_digits)
+    index = utr_digits % 25
+    day = index / 5
+    hour = index % 5
+
+    days = %w[monday tuesday friday saturday sunday]
+    hours = [20, 22, 0, 2, 4]
+
+    {
+      day_of_week: days[day],
+      start_time: hours[hour]
+    }
+  end
+
+  def create_utr_site_schedule(site_id:)
+    site = fetch_site(site_id)
+    raise 'The site is not a valid UTR site' unless site.utr?
+
+    scan_name = site.name
+    site.utr_digits
+    slot = scan_slot(site.utr_digits)
+    scan_template_id = site.scan_template_id
+    duration_in_hours = 2
+
+    create_weekly_scan(
+      day_of_week: slot[:day_of_week],
+      start_time: slot[:start_time],
+      duration_in_hours:,
+      site_id:,
+      scan_name:,
+      scan_template_id:
+    )
   end
 
   def fetch_discovery_scan_template_id(country)
