@@ -77,6 +77,19 @@ class App
       end
     end
 
+    c.desc 'Add weekly schedule to all UTR sites'
+    c.command :schedule_utrs do |s|
+      s.action do |_global_options, _options, _args|
+        puts 'Fetching UTR sites ...'
+        sites = App.api.fetch_utr_sites
+        sites.each do |site|
+          puts "Site #{site.name}"
+          schedule_id = App.api.create_utr_site_schedule(site_id: site.id)
+          puts 'Schedule created' unless schedule_id.nil?
+        end
+      end
+    end
+
     c.desc 'Add weekly schedule to UTR site'
     c.command :schedule_utr do |s|
       s.action do |_global_options, options, _args|

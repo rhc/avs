@@ -32,8 +32,10 @@ class Site
     return nil unless utr?
 
     if name.include?(':za:')
+      # settings[:za_full_audit]
       '_-sa-ca-_100_-_-pps_min-2000-_-max-15000-_--_-full-audit-without-web-spider'
     else
+      # settings[:ar_full_audit]
       '_-angola-ca-_100_-_-pps_min-450-_-max-450-_--_-full-audit-without-web-spider-copy'
     end
   end
