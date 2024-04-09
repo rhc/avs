@@ -16,6 +16,7 @@ class InsightVMApi
   # @param [String]
   # @param [Hash] optional parameters: page, size, type, name, sort
   def fetch_all(endpoint, opts = {}, &block)
+    puts "fetch_all #{endpoint}"
     params = { page: 0, size: 100 }.merge opts
     loop do
       full_url = @base_url.dup
@@ -26,11 +27,13 @@ class InsightVMApi
       request = Net::HTTP::Get.new(full_url)
       request['Authorization'] = @base_auth
       response = @http.request(request)
-      break unless response.is_a?(Net::HTTPSuccess)
+      unless response.is_a?(Net::HTTPSuccess)
+        puts "Error with code #{response.code}"
+        break
+      end
 
       json_response = JSON.parse(response.body)
       resources = json_response['resources']
-      # puts "resources #{resources}"
       resources.each(&block) # equivalent to resources.each {|resource| yield resource}
 
       # Check if this is the last page
@@ -60,12 +63,11 @@ class InsightVMApi
     request['Content-Type'] = 'application/json'
     request['Authorization'] = @base_auth
     request.body = params.to_json
-    p request.body
     # Send the request
     response = @http.request(request)
 
     if response.is_a?(Net::HTTPSuccess)
-      puts 'Success!'
+      # puts 'Success!'
       # You can parse the response body if needed
       JSON.parse(response.body)
     else
@@ -82,11 +84,9 @@ class InsightVMApi
     # Send the requesbody
     response = @http.request(request)
 
-    if response.is_a?(Net::HTTPSuccess)
-      puts 'Success!'
-    else
-      puts "Error deleting #{endpoint}/#{id} Status code: #{response.code}, Response body: #{response.body}"
-    end
+    return if response.is_a?(Net::HTTPSuccess)
+
+    puts "Error deleting #{endpoint}/#{id} Status code: #{response.code}, Response body: #{response.body}"
   end
 
   def put(endpoint, body)
@@ -99,14 +99,9 @@ class InsightVMApi
     # Send the requesbody
     response = @http.request(request)
 
-    if response.is_a?(Net::HTTPSuccess)
-      puts 'Success!'
-      # You can parse the response body if needed
-      parsed_response = JSON.parse(response.body)
-      puts parsed_response
-    else
-      puts "Error creating site. Status code: #{response.code}, Response body: #{response.body}"
-    end
+    return if response.is_a?(Net::HTTPSuccess)
+
+    puts "Error creating site. Status code: #{response.code}, Response body: #{response.body}"
   end
 
   def fetch(endpoint)

@@ -115,11 +115,13 @@ class InsightVMApi
         next
       end
 
-      puts "\t Create asset group for #{site_name} site "
-      create_asset_group_for(site_id:)
+      puts "\tCreate asset group: #{site_name}"
+      create_asset_group_for(site_id:, site_name:)
 
-      puts "\t Starts discovery #{starts_discovery} for #{site_name} site"
-      starts_discovery_scan(site_id:) if starts_discovery
+      next unless starts_discovery
+
+      puts "\tStart discovery scan"
+      starts_discovery_scan(site_id:)
     end
   end
 
@@ -142,16 +144,17 @@ class InsightVMApi
     return if assets.empty?
 
     country = assets.first.country
-    puts "Country #{country}"
     targets = assets.map(&:fqdn)
     scan_engine_pool = fetch_country_scan_engine_pools(country)
     # puts "Scan engine pool #{scan_engine_pool}"
     engine_id = scan_engine_pool[:id]
     scan_template_id = fetch_discovery_scan_template_id(country)
-    puts '-' * 20
-    puts "Creating Site #{site_name}\n #{targets.length} Targets: #{targets}"
-    puts '-' * 20
+    puts
+    puts '-' * 40
+    puts "Site #{site_name}\nTargets: #{targets.length} #{targets.join(' ')}"
+    puts '-' * 40
 
+    # TODO: check if the site already exists
     site_id = create_utr_site(
       name: site_name,
       description: site_name,
@@ -159,18 +162,21 @@ class InsightVMApi
       engine_id:,
       scan_template_id:
     )
-    return if site_id.nil?
+    if site_id.nil?
+      puts "Site #{site_name} already exists!"
+      return
+    end
 
     # add site credential
     shared_credential = fetch_cyberark(country)
-    puts "Add CyberArk credential #{shared_credential[:name]}"
-    credential_id = shared_credential[:id]
+    puts "\tAdd credential: #{shared_credential.name}"
+    credential_id = shared_credential.id
     add_site_shared_credentials(site_id:, credential_id:)
 
     # tag assets with business unit code, sub_area, app + utr,
     tag_names = assets.first.utr_tag_names
     tags = tag_names.map do |tag_name|
-      puts "Add tag #{tag_name}"
+      puts "\tAdd tag: #{tag_name}"
       get_or_create_tag(name: tag_name, cached_tags:)
     end
     tag_ids = tags.map(&:id)

@@ -81,7 +81,6 @@ class InsightVMApi
       type:
     }
     result = post('/asset_groups', params)
-    puts result
     result&.dig('id')
   end
 

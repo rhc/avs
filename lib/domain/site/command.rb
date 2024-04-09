@@ -45,6 +45,22 @@ class App
       end
     end
 
+    c.desc 'List scan schedules'
+    c.command :scan_schedules do |g|
+      # TODO: add the switch
+      # g.switch [:enabled], desc: 'Only enabled schedules', default_value: nil, negatable: true
+      g.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        enabled = options[:enabled]
+        puts enabled
+        raise 'Site ID is required' if site_id.nil?
+
+        App.api.fetch_site_scan_schedules(site_id:) do |schedule|
+          puts schedule.to_json # if enabled.nil? || enabled == schedule.enabled
+        end
+      end
+    end
+
     c.desc 'Add tag to site'
     c.command :add_tag do |at|
       at.flag [:tag_name], desc: 'Tag Name'
@@ -74,8 +90,7 @@ class App
           exit
         end
         starts_discovery = options[:starts_discovery]
-        puts "starts discovery: #{starts_discovery}"
-        puts 'Fetching CMDB assets ...'
+        puts 'Fetching assets from CMDB ...'
         cmdb_assets = App.db.fetch_cmdb_assets
         App.api.create_utr_sites_for(
           business_unit:,

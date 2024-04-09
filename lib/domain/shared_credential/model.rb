@@ -60,7 +60,6 @@ class SharedCredential
     )
   end
 
-
   def to_json(*_options)
     {
       account: @account,
@@ -89,7 +88,6 @@ class SharedCredential
   # if the name starts with CyberArk
   # and the name contains the country name
   def cyberark?(country)
-    pattern = "CyberArk #{country}"
-    !!(name =~ /#{Regexp.escape(pattern)}/)
+    name.downcase.include?('cyberark') && name.downcase.include?(country.downcase)
   end
 end

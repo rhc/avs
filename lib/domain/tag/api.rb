@@ -61,8 +61,6 @@ class InsightVMApi
     type: 'custom',
     source: 'custom'
   )
-    puts "type #{type}"
-    puts "color #{color}"
     params = {
       color:,
       name:,
@@ -71,7 +69,6 @@ class InsightVMApi
       source:
     }
     result = post('/tags', params)
-    puts result
     result&.dig('id')
   end
 
