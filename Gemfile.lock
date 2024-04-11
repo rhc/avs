@@ -5,6 +5,7 @@ PATH
       dotenv (~> 3.1.0)
       gli (~> 2.21.1)
       mail (~> 2.8.1)
+      pg (~> 1.5.6)
 
 GEM
   remote: https://rubygems.org/
@@ -30,6 +31,7 @@ GEM
       timeout
     net-smtp (0.4.0.1)
       net-protocol
+    pg (1.5.6)
     psych (5.1.2)
       stringio
     rake (13.1.0)

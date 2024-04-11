@@ -55,7 +55,7 @@ class App
 
   # TODO use the ENV for host, db, port
   def self.db
-    @db ||= Db.new(host: '127.0.0.1', db: 'avs', user: 'avs',port: 5433)
+    @db ||= Db.new(host: '127.0.0.1', db: 'avs', user: 'avs', port: 5433)
   end
 
   def self.mail

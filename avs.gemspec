@@ -20,4 +20,5 @@ spec = Gem::Specification.new do |s|
   s.add_runtime_dependency('dotenv', '~> 3.1.0')
   s.add_runtime_dependency('gli', '~> 2.21.1')
   s.add_runtime_dependency('mail', '~> 2.8.1')
+  s.add_runtime_dependency('pg', '~> 1.5.6')
 end
