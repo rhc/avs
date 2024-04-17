@@ -5,3 +5,4 @@ Dir.glob(File.join(__dir__, '**', 'db.rb')).each do |file|
 end
 
 require_relative 'asset/db'
+require_relative 'vulnerability/db'
