@@ -21,6 +21,7 @@ class InsightVMApi
   def create_weekly_scan(
     day_of_week:,
     start_time:,
+    time_zone:,
     duration_in_hours:,
     site_id:,
     scan_name: nil,

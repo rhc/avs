@@ -40,6 +40,19 @@ class Site
     end
   end
 
+  # returns the time_zone
+  # from the 2-letter country code
+  def time_zone(country_code)
+    # {'a'}
+  end
+
+  def country_code
+    return nil unless utr?
+
+    matches = name.match(/^:(.*?):/)
+    matches ? matches[1] : nil
+  end
+
   def utr_digits
     utr_pattern = /:UTR(\d{5})$/
     digits = name.match(utr_pattern)

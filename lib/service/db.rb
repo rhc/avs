@@ -20,7 +20,7 @@ class Db
     columns = model.class.columns
     column_names = columns.join(', ')
     placeholders = columns.map.with_index(1) { |_, i| "$#{i}" }.join(', ')
-    conflict_target = columns.first # Unique identifier assumption
+    conflict_target = model.class.primary_key # Unique identifier assumption
     update_assignments = columns.map do |column|
       "#{column} = EXCLUDED.#{column}"
     end.join(', ')

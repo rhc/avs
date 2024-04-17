@@ -151,6 +151,7 @@ class InsightVMApi
     scan_name = site.name
     site.utr_digits
     slot = scan_slot(site.utr_digits)
+    time_zone = site.time_zone
     scan_template_id = site.scan_template_id
     duration_in_hours = 2
 
