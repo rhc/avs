@@ -23,4 +23,12 @@ module CisaKevApi
       yield CisaKevVulnerability.from_json(vulnerability)
     end
   end
+
+  def self.vulnerabilities
+    list = []
+    fetch_vulnerabilities do |vulnerability|
+      list << vulnerability
+    end
+    list
+  end
 end
