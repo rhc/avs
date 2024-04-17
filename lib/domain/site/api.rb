@@ -144,6 +144,21 @@ class InsightVMApi
     }
   end
 
+  def delete_utr_site_schedules(site_id:)
+    fetch_site_scan_schedules(site_id:) do |scan_schedule|
+      delete_scan_schedule(site_id:, schedule_id: scan_schedule.id)
+    end
+  end
+
+  def upsert_utr_site_schedule(site_id:)
+    site = fetch_site(site_id)
+    raise 'The site is not a valid UTR site' unless site.utr?
+
+    delete_utr_site_schedules(site_id:)
+
+    create_utr_site_schedule(site_id:)
+  end
+
   def create_utr_site_schedule(site_id:)
     site = fetch_site(site_id)
     raise 'The site is not a valid UTR site' unless site.utr?
@@ -151,13 +166,14 @@ class InsightVMApi
     scan_name = site.name
     site.utr_digits
     slot = scan_slot(site.utr_digits)
-    time_zone = site.time_zone
+    country_code = site.country_code
     scan_template_id = site.scan_template_id
     duration_in_hours = 2
 
     create_weekly_scan(
+      country_code:,
       day_of_week: slot[:day_of_week],
-      start_time: slot[:start_time],
+      start_hour: slot[:start_time],
       duration_in_hours:,
       site_id:,
       scan_name:,

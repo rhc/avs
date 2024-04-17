@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../../service/time_zone'
 require_relative 'model'
 
 class InsightVMApi
@@ -19,10 +20,8 @@ class InsightVMApi
 
   def create_weekly_scan(
     day_of_week:,
-    start_time:,
-    time_zone:,
-    duration_in_hours:,
-    site_id:,
+    start_hour:,
+    country_code:, duration_in_hours:, site_id:, start_minute: 0,
     scan_name: nil,
     scan_engine_id: nil,
     scan_template_id: nil
@@ -31,10 +30,13 @@ class InsightVMApi
     year = now.year
     month = now.month
     day = now.day
-    # starts_at = DateTime.new(year, month, day, start_time, 0, 0, Rational(time_zone, 24))
-    # start = starts_at.to_s
-    start = '2023-10-05T15:45:30+01:00[Africa/Kinshasa]'
+    start_time = DateTime.new(year, month, day, start_hour, start_minute)
+    local_time = Service::DateTime.closest_day_of_week(start_time, day_of_week)
+    start = Service::TimeZone.iso8601(country_code:,
+                                      local_time:)
     puts start
+    puts scan_name
+    puts country_code
     repeat = ScanSchedule::Repeat.new(
       every: 'week',
       day_of_week:,
@@ -49,6 +51,10 @@ class InsightVMApi
       start:,
       scan_name:
     )
+  end
+
+  def delete_scan_schedule(site_id:, schedule_id:)
+    delete("/sites/#{site_id}/scan_schedules", schedule_id)
   end
 
   def create_scan_schedule(
@@ -84,7 +90,7 @@ class InsightVMApi
       duration:,
       enabled:,
       start:,
-      repeat:,
+      repeat: JSON.parse(repeat.to_json),
       scanEngineId: scan_engine_id,
       scanTemplateId: scan_template_id,
       onScanRepeat: on_scan_repeat,

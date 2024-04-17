@@ -5,25 +5,25 @@ require 'active_support/all'
 module Service
   module TimeZone
     ZONES = {
-      'ao' => 'Africa/Luanda',          # Angola
-      'bw' => 'Africa/Gaborone',        # Botswana
-      'cd' => 'Africa/Kinshasa',        # Democratic Republic of the Congo
-      'sz' => 'Africa/Mbabane',         # Eswatini
-      'gh' => 'Africa/Accra',           # Ghana
-      'intl' => 'Etc/UTC',              # International (Generic UTC)
-      'ci' => 'Africa/Abidjan',         # Ivory Coast
-      'je' => 'Europe/Jersey',          # Jersey
+      'ao' => 'Africa/Casablanca', # Angola
+      'bw' => 'Africa/Harare', # Botswana
+      'cd' => 'Africa/Casablanca', # Democratic Republic of the Congo
+      'sz' => 'Africa/Harare', # Eswatini
+      'gh' => 'Atlantic/Azores', # Ghana
+      'intl' => 'Atlantic/Azores', # International (Generic UTC)
+      'ci' => 'Atlantic/Azores', # Ivory Coast
+      'je' => 'Europe/London',          # Jersey
       'ke' => 'Africa/Nairobi',         # Kenya
-      'ls' => 'Africa/Maseru',          # Lesotho
-      'mw' => 'Africa/Blantyre',        # Malawi
-      'mu' => 'Indian/Mauritius',       # Mauritius
-      'mz' => 'Africa/Maputo',          # Mozambique
-      'na' => 'Africa/Windhoek',        # Namibia
-      'ng' => 'Africa/Lagos',           # Nigeria
-      'za' => 'Africa/Johannesburg',    # South Africa
-      'tz' => 'Africa/Dar_es_Salaam',   # Tanzania
-      'ug' => 'Africa/Kampala',         # Uganda
-      'zm' => 'Africa/Lusaka',          # Zambia
+      'ls' => 'Africa/Harare',          # Maseru Lesotho
+      'mw' => 'Africa/Harare', # Malawi
+      'mu' => 'Asia/Muscat', # Mauritius
+      'mz' => 'Africa/Harare', # Mozambique
+      'na' => 'Africa/Harare', # Namibia
+      'ng' => 'Africa/Casablanca', # Nigeria
+      'za' => 'Africa/Harare', # South Africa
+      'tz' => 'Africa/Nairobi', # Tanzania
+      'ug' => 'Africa/Kampala', # Uganda
+      'zm' => 'Africa/Nairobi', # Zambia
       'zw' => 'Africa/Harare', # Zimbabwe
       'us' => 'America/Los_Angeles'
     }
@@ -44,6 +44,20 @@ module Service
       zone = ActiveSupport::TimeZone[zone_id]
       datetime = zone.local(local_time.year, local_time.month, local_time.day, local_time.hour, local_time.minute)
       datetime.iso8601 + "[#{zone.name}]"
+    end
+  end
+
+  module DateTime
+    # return start_date if start_datetime day of week == day_of_week
+    # return the day after start_date with the same day_of_week
+    def self.closest_day_of_week(start_datetime, day_of_week)
+      target_index = Date::DAYNAMES.index(day_of_week.capitalize)
+      start_index = start_datetime.wday
+      difference = target_index - start_index
+      return start_datetime if difference.zero?
+
+      delta = (difference + 7) % 7
+      start_datetime + delta
     end
   end
 end

@@ -90,24 +90,24 @@ class App
       end
     end
 
-    c.desc 'Add weekly schedule to UTR site'
+    c.desc 'Create or update UTR site weekly schedule'
     c.command :schedule_utr do |s|
       s.action do |_global_options, options, _args|
         site_id = options[GLI::Command::PARENT][:id]
         raise 'The site id is required' if site_id.nil?
 
-        schedule_id = App.api.create_utr_site_schedule(
+        schedule_id = App.api.upsert_utr_site_schedule(
           site_id:
         )
         puts 'Schedule created' unless schedule_id.nil?
       end
     end
 
-    c.desc 'Add weekly schedule to site'
+    c.desc 'Add weekly schedule to a site'
     c.command :schedule do |s|
       s.flag [:every], desc: 'Day of the week'
       s.flag [:at], desc: 'Hour', type: Integer
-      s.flag [:time_zone], desc: 'Time Zone example: -1', type: Integer, default: 0
+      s.flag [:country_code], desc: '2-letter country code'
       s.action do |_global_options, options, _args|
         site_id = options[GLI::Command::PARENT][:id]
         raise 'The site id is required' if site_id.nil?
@@ -118,12 +118,13 @@ class App
           puts 'The day of the week is required'
           exit
         end
-        time_zone = options[:time_zone]
-        puts time_zone
+        country_code = options[:country_code]
+        puts country_code
         schedule_id = App.api.create_weekly_scan(
           day_of_week: every,
-          start_time: at,
-          time_zone:,
+          start_hour: at,
+          start_minute: 0,
+          country_code:,
           duration_in_hours: 2,
           site_id:
         )
