@@ -107,6 +107,7 @@ class App
     c.command :schedule do |s|
       s.flag [:every], desc: 'Day of the week'
       s.flag [:at], desc: 'Hour', type: Integer
+      s.flag [:time_zone], desc: 'Time Zone example: -1', type: Integer, default: 0
       s.action do |_global_options, options, _args|
         site_id = options[GLI::Command::PARENT][:id]
         raise 'The site id is required' if site_id.nil?
@@ -117,9 +118,12 @@ class App
           puts 'The day of the week is required'
           exit
         end
+        time_zone = options[:time_zone]
+        puts time_zone
         schedule_id = App.api.create_weekly_scan(
           day_of_week: every,
           start_time: at,
+          time_zone:,
           duration_in_hours: 2,
           site_id:
         )

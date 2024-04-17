@@ -17,6 +17,8 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('minitest')
   s.add_development_dependency('rake')
   s.add_development_dependency('rdoc')
+  s.add_runtime_dependency('activesupport', '~> 7.1.3.2')
+  s.add_runtime_dependency('connection_pool', '~> 2.4.1')
   s.add_runtime_dependency('dotenv', '~> 3.1.0')
   s.add_runtime_dependency('gli', '~> 2.21.1')
   s.add_runtime_dependency('mail', '~> 2.8.1')

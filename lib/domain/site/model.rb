@@ -96,3 +96,6 @@ class CmdbSite
     [name, country_code, business_unit, sub_area, application, utr].join ','
   end
 end
+
+
+

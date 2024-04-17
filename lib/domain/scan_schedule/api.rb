@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 require_relative 'model'
@@ -32,8 +31,10 @@ class InsightVMApi
     year = now.year
     month = now.month
     day = now.day
-    starts_at = DateTime.new(year, month, day, start_time)
-    start = starts_at.iso8601
+    # starts_at = DateTime.new(year, month, day, start_time, 0, 0, Rational(time_zone, 24))
+    # start = starts_at.to_s
+    start = '2023-10-05T15:45:30+01:00[Africa/Kinshasa]'
+    puts start
     repeat = ScanSchedule::Repeat.new(
       every: 'week',
       day_of_week:,
