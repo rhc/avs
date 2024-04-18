@@ -3,6 +3,8 @@
 class Site
   attr_accessor :id, :name, :description, :risk_score, :scan_engine, :scan_template
 
+
+
   def initialize(id:, name:, description:, risk_score:, scan_engine:, scan_template:)
     @id = id
     @name = name
@@ -53,6 +55,10 @@ class Site
     matches ? matches[1] : nil
   end
 
+  def country
+
+  end
+
   def utr_digits
     utr_pattern = /:UTR(\d{5})$/
     digits = name.match(utr_pattern)
@@ -68,6 +74,9 @@ class Site
     !!(name =~ utr_pattern)
   end
 end
+
+
+
 
 class CmdbSite
   attr_accessor :name, :country_code, :business_unit, :sub_area, :application, :utr

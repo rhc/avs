@@ -5,7 +5,7 @@ require 'pg'
 require_relative '../domain/db'
 
 class Db
-  attr_reader :host, :db, :user, :port
+  attr_reader :host, :db, :user, :port, :connection
 
   def initialize(host:, db:, user:, port:)
     @host = host
@@ -13,6 +13,25 @@ class Db
     @user = user
     @port = port
     @connection = PG.connect(host:, dbname: db, port:, user:)
+  end
+
+  def all(model_class)
+    sql = "SELECT * FROM #{model_class.table_name}"
+    result = @connection.exec(sql)
+    result.map do |row|
+      model_class.new(row)
+    end
+  end
+
+  def find_by(model_class, attribute, value)
+    sql = "SELECT * FROM #{model_class.table_name} WHERE #{attribute} = $1"
+    result = @connection.exec_params(sql, [value])
+    result.map do |row|
+      model_class.new(row)
+    end
+    return nil if result.ntuples.zero?
+
+    model_class.new(result.first.symbolize_keys)
   end
 
   def upsert(model)
@@ -36,6 +55,8 @@ class Db
   rescue PG::Error => e
     puts "An error occurred: #{e.message}"
   end
+
+  def select_view; end
 
   def fetch_view(view, &block)
     ENV['PGPASSFILE'] = '/Users/ckyony/.pgpass'

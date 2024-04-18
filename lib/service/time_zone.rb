@@ -22,7 +22,7 @@ module Service
       'ng' => 'Africa/Casablanca', # Nigeria
       'za' => 'Africa/Harare', # South Africa
       'tz' => 'Africa/Nairobi', # Tanzania
-      'ug' => 'Africa/Kampala', # Uganda
+      'ug' => 'Africa/Nairobi', # Uganda
       'zm' => 'Africa/Nairobi', # Zambia
       'zw' => 'Africa/Harare', # Zimbabwe
       'us' => 'America/Los_Angeles'
