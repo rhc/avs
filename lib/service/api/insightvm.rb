@@ -75,7 +75,7 @@ class InsightVMApi
     end
   end
 
-  def delete(endpoint, id)
+  def delete(endpoint, site_id)
     uri = URI("#{@base_url}#{endpoint}/#{id}")
     request = Net::HTTP::Delete.new(uri)
     request['Content-Type'] = 'application/json'

@@ -17,8 +17,8 @@ class InsightVMApi
     end
   end
 
-  def fetch_site(id)
-    fetch("/sites/#{id}") do |data|
+  def fetch_site(site_id)
+    fetch("/sites/#{site_id}") do |data|
       return Site.from_json(data)
     end
     nil
@@ -223,11 +223,13 @@ class InsightVMApi
       return
     end
 
-    # add site credential
-    shared_credential = fetch_cyberark(country)
-    puts "\tAdd credential: #{shared_credential.name}"
-    credential_id = shared_credential.id
-    add_site_shared_credentials(site_id:, credential_id:)
+    # add site to shared credential
+    site = fetch_site(site_id)
+    site_ids = [site.id]
+    shared_credentials = fetch_site_cyberark_credentials(site)
+    shared_credentials.each do |credential|
+      update_shared_credential_sites(credential:, site_ids:)
+    end
 
     # tag assets with business unit code, sub_area, app + utr,
     tag_names = assets.first.utr_tag_names
@@ -255,30 +257,30 @@ class InsightVMApi
     post("/sites/#{site_id}/scans", params)
   end
 
-  def delete_site_by(id:, name:)
-    raise 'Specify either id or name' if id.nil? && name.nil?
+  def delete_site_by(site_idte_idte_idte_id:, name:)
+    raise 'Specify either id or name' if site_idte_id.nil? && name.nil?
 
-    if id
-      delete_site(id)
+    if site_idte_id
+      delete_site(site_idte_id)
     else
       site = fetch_site_by_name(name)
-      delete_site(site.id)
+      delete_site(site.site_idte_id)
     end
   end
 
-  def delete_site(id)
-    raise 'Cannot delete site without id' if id.nil?
+  def delete_site(site_id)
+    raise 'Cannot delete site without id' if site_id.nil?
 
-    site = fetch_site(id)
-    raise "Site #{id} does not exist." if site.nil?
+    site = fetch_site(site_id)
+    raise "Site #{site_id} does not exist." if site.nil?
 
     puts 'Delete asset group with the same name as the site'
     delete_asset_group_by(name: site.name)
 
-    puts "Delete assets from site #{id}"
-    delete("/sites/#{id}/assets", '')
-    puts "Delete site #{id}"
-    delete('/sites', id)
+    puts "Delete assets from site #{site_id}"
+    delete("/sites/#{site_id}/assets", '')
+    puts "Delete site #{site_id}"
+    delete('/sites', site_id)
   end
 
   def create_utr_site(
@@ -297,4 +299,15 @@ class InsightVMApi
       included_targets: targets
     )
   end
+
+  def fetch_site_cyberark_credentials(site)
+    country = site.country_code
+    return fetch_country_cyberark(country) if country_code != 'za'
+
+    domains = fetch_site_domains(site)
+    fetch_domain_cyberark(domains)
+  end
+
+
+  def fetch_site_domains(site); end
 end

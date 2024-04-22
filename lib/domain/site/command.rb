@@ -40,8 +40,8 @@ class App
     c.desc 'Get site by id'
     c.command :get do |g|
       g.action do |_global_options, options, _args|
-        id = options[GLI::Command::PARENT][:id]
-        puts "TODO get site id #{id}"
+        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
+        puts "TODO get site id #{site_idte_id}"
       end
     end
 
@@ -65,7 +65,7 @@ class App
     c.command :add_tag do |at|
       at.flag [:tag_name], desc: 'Tag Name'
       at.action do |_global_options, options, _args|
-        id = options[GLI::Command::PARENT][:id]
+        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
         tag_name = options[:tag_name]
         if tag_name.nil?
           puts 'Tag name is required'
@@ -73,7 +73,7 @@ class App
         end
         tag = App.api.get_or_create_tag(name: tag_name)
         puts "Tag #{tag.to_json}"
-        App.api.add_utr_tags(site_id: id, tag_ids: [tag.id])
+        App.api.add_utr_tags(site_id: site_idte_id, tag_ids: [tag.id])
       end
     end
 
@@ -158,9 +158,9 @@ class App
     c.desc 'Delete site by id or name'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
-        id = options[GLI::Command::PARENT][:id]
+        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
         name = options[GLI::Command::PARENT][:name]
-        App.api.delete_site_by id:, name:
+        App.api.delete_site_by site_idte_idte_idte_id:, name:
       end
     end
 

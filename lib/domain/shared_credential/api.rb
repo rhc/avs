@@ -18,12 +18,12 @@ class InsightVMApi
     fetch_country_cyberark(country)
   end
 
-  def fetch_cyberark(country)
+  def fetch_country_cyberark(country)
     credentials = all_shared_credentials
     credentials.find { |credential| credential.cyberark?(country) }
   end
 
-  def fetch_cyberark_by(domains:)
+  def fetch_domain_cyberark(domains = [])
     credentials = Set.new
     domains.each do |domain|
       if domain.include?('eswitch.sbicdirectory.com')
@@ -46,12 +46,11 @@ class InsightVMApi
   end
 
   # Add the site_id to the shared credential sites
-  def add_site_shared_credentials(site_id:, credential_id:)
-    # retrieve the credential_id
-    credential = fetch_shared_credential(credential_id)
-    return if credential.sites.include?(site_id)
+  def update_shared_credential_sites(credential:, site_ids: [])
+    new_site_ids = credential_sites & site_ids
+    return if new_site_ids.empty?
 
-    credential.sites += [site_id]
+    credential.sites += new_site_ids
     endpoint = "/shared_credentials/#{credential_id}"
     put(endpoint, credential)
   end
@@ -62,8 +61,8 @@ class InsightVMApi
     end
   end
 
-  def fetch_shared_credential(id)
-    fetch("/shared_credentials/#{id}") do |data|
+  def fetch_shared_credential(site_id)
+    fetch("/shared_credentials/#{site_id}") do |data|
       SharedCredential.from_json(data)
     end
   end

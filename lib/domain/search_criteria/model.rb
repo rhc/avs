@@ -41,7 +41,7 @@ class SearchCriteria
       new(
         field: 'site-id',
         operator: 'in',
-        values: [id]
+        values: [site_idte_id]
       )
     end
 

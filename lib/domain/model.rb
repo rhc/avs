@@ -22,7 +22,7 @@ class Domain
     end
 
     def to_s
-      self.class.columns.map { |attr| send(attr) }.join(', ')
+      self.class.columns.map { |attr| send(attr) }.join(',')
     end
   end
 end

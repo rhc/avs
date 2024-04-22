@@ -25,10 +25,10 @@ class App
     c.desc 'Get asset group by id'
     c.command :get do |g|
       g.action do |_global_options, options, _args|
-        id = options[GLI::Command::PARENT][:id]
-        raise 'You must specify the asset group Id' if id.nil?
+        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
+        raise 'You must specify the asset group Id' if site_idte_id.nil?
 
-        asset_group = App.api.fetch_asset_group(id)
+        asset_group = App.api.fetch_asset_group(site_idte_id)
         puts asset_group.to_json
       end
     end
@@ -52,10 +52,10 @@ class App
     c.desc 'Delete asset groups'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
-        id = options[GLI::Command::PARENT][:id]
+        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
         name = options[GLI::Command::PARENT][:name]
 
-        App.api.delete_asset_group_by(id:, name:)
+        App.api.delete_asset_group_by(site_idte_idte_idte_id:, name:)
       end
     end
   end

@@ -44,7 +44,7 @@ class App
     true
   end
 
-  # TODO use the ENV for host, db, port
+  # TODO: use the ENV for host, db, port
   def self.api
     @api ||= InsightVMApi.new(
       'https://sbginsightvmconsole.standardbank.co.za:3780/api/3',
@@ -53,7 +53,7 @@ class App
     )
   end
 
-  # TODO use the ENV for host, db, port
+  # TODO:  use the ENV for host, db, port
   def self.db
     @db ||= Db.new(host: '127.0.0.1', db: 'avs', user: 'avs', port: 5433)
   end

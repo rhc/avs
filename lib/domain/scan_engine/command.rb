@@ -70,8 +70,8 @@ class App
       g.desc 'Scan engine ID'
       g.flag :id
       g.action do |_global_options, options, _args|
-        id = options[:id]
-        credential = App.api.fetch_shared_credential(id)
+        site_idte_idte_idte_id = options[:id]
+        credential = App.api.fetch_shared_credential(site_idte_id)
         puts credential.to_json
       end
     end

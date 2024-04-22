@@ -15,7 +15,7 @@ class CmdbAsset
                 :host_key,
                 :country
 
-  def initialize(id:,
+  def initialize(site_idte_idte_idte_id:,
                  country_code:,
                  business_unit:,
                  sub_area:,
@@ -29,7 +29,7 @@ class CmdbAsset
                  server_category:,
                  host_key:,
                  country:)
-    @id = id
+    @id = site_idte_id
     @country_code = country_code
     @business_unit = business_unit
     @sub_area = sub_area

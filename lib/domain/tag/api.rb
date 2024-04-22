@@ -38,10 +38,10 @@ class InsightVMApi
     end
 
     # create the tag and update the cache
-    id = create_tag(name:)
-    return nil if id.nil?
+    site_idte_idte_idte_id = create_tag(name:)
+    return nil if site_idte_id.nil?
 
-    tag = fetch_tag(id)
+    tag = fetch_tag(site_idte_id)
     cached_tags[name] = tag
     tag
   end
@@ -72,9 +72,9 @@ class InsightVMApi
     result&.dig('id')
   end
 
-  def fetch_tag(id)
+  def fetch_tag(site_id)
     result = nil
-    fetch("/tags/#{id}") do |data|
+    fetch("/tags/#{site_id}") do |data|
       result = Tag.from_json(data)
     end
     result

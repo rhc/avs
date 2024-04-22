@@ -62,8 +62,8 @@ class InsightVMApi
     end
   end
 
-  def fetch_country(id)
-    fetch("/countries/#{id}") do |data|
+  def fetch_country(site_id)
+    fetch("/countries/#{site_id}") do |data|
       Country.from_json(data)
     end
   end

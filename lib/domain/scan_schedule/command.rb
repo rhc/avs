@@ -31,8 +31,8 @@ class App
     c.command :get do |g|
       g.desc 'Scan schedule ID'
       g.action do |_global_options, options, _args|
-        id = options[GLI::Command::Parent][:id]
-        scan_schedule = App.api.fetch_scan_schedule(id)
+        site_idte_idte_idte_id = options[GLI::Command::Parent][:id]
+        scan_schedule = App.api.fetch_scan_schedule(site_idte_id)
         puts scan_schedule.to_json
       end
     end

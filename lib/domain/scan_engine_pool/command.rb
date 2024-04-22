@@ -24,8 +24,8 @@ class App
       g.desc 'scan engine pool ID'
       g.flag :id
       g.action do |_global_options, options, _args|
-        id = options[:id]
-        credential = App.api.fetch_scan_engine_pool(id)
+        site_idte_idte_idte_id = options[:id]
+        credential = App.api.fetch_scan_engine_pool(site_idte_id)
         puts credential.to_json
       end
     end

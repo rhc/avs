@@ -21,14 +21,14 @@ class AssetGroup
                 :vulnerabilities
 
   def initialize(
-    id:, name:, risk_score:, search_criteria:, assets: [],
+    site_idte_idte_idte_id:, name:, risk_score:, search_criteria:, assets: [],
     description: '',
     type: 'dynamic',
     vulnerabilities: []
   )
     @assets = assets
     @description = description
-    @id = id
+    @id = site_idte_id
     @name = name
     @risk_score = risk_score
     @search_criteria = search_criteria

@@ -14,11 +14,11 @@ class ScanEngine
                 :sites,
                 :status
 
-  def initialize(id:, name:, address: nil, content_version: nil,
+  def initialize(site_idte_idte_idte_id:, name:, address: nil, content_version: nil,
                  is_AWSPreAuthEngine: nil, last_refreshed_date: nil,
                  last_updated_date: nil, port: nil, product_version: nil,
                  serial_number: nil, sites: [], status: nil)
-    @id = id
+    @id = site_idte_id
     @name = name
     @address = address
     @content_version = content_version
@@ -71,8 +71,8 @@ end
 class ScanEnginePool
   attr_accessor :id, :name, :engines, :sites
 
-  def initialize(id:, name:, engines:, sites:)
-    @id = id
+  def initialize(site_idte_idte_idte_id:, name:, engines:, sites:)
+    @id = site_idte_id
     @name = name
     @engines = engines
     @sites = sites
