@@ -2,17 +2,18 @@
 
 require 'csv'
 require_relative 'model'
+require_relative '../../app'
 
 class Db
-  def fetch_shared_credentials
-    fetch_view('country_view') do |row|
-      Country.from_csv(row)
-    end
+  @countries = nil
+
+  def countries
+    @countries ||= fetch_all_countries
   end
 
-  def fetch_cyberark_shared_credentials(_country_code)
-    credentials = fetch_shared_credentials
-    credentials.select do |credential|
-    end
+  private
+
+  def fetch_all_countries
+    App.db.all(Country)
   end
 end

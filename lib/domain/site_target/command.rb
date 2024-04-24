@@ -23,7 +23,7 @@ class App
       d.action do |_global_options, options, _args|
         site_id = options[GLI::Command::PARENT][:site_id]
         puts 'domain'
-        domains = App.api.fetch_site_domains(site_id)
+        domains = App.api.fetch_site_target_domains(site_id)
         domains.sort.each do |domain|
           puts domain
         end

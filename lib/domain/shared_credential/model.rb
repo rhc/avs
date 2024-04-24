@@ -5,7 +5,7 @@
 class SharedCredential
   attr_accessor :id, :description, :host_restriction, :port_restriction, :name, :account, :site_assignment, :sites
 
-  def initialize(site_idte_idte_idte_id:,
+  def initialize(id:,
                  name:,
                  account:,
                  site_assignment:,
@@ -16,7 +16,7 @@ class SharedCredential
     @account = account
     @description = description
     @host_restriction = host_restriction
-    @id = site_idte_id
+    @id = id
     @name = name
     @port_restriction = port_restriction
     @site_assignment  = site_assignment

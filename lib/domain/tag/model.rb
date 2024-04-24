@@ -14,7 +14,7 @@ class Tag
                 :type
 
   def initialize(
-    site_idte_idte_idte_id:,
+    id:,
     name:,
     color: 'default',
     created: nil,
@@ -23,7 +23,7 @@ class Tag
     source: 'custom',
     type: 'custom'
   )
-    @id = site_idte_id
+    @id = id
     @name = name
     @color = color
     @source = source

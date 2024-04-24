@@ -1,4 +1,3 @@
-
 class CmdbAsset
   attr_accessor :id,
                 :country_code,
@@ -15,7 +14,7 @@ class CmdbAsset
                 :host_key,
                 :country
 
-  def initialize(site_idte_idte_idte_id:,
+  def initialize(id:,
                  country_code:,
                  business_unit:,
                  sub_area:,
@@ -29,7 +28,7 @@ class CmdbAsset
                  server_category:,
                  host_key:,
                  country:)
-    @id = site_idte_id
+    @id = id
     @country_code = country_code
     @business_unit = business_unit
     @sub_area = sub_area
@@ -70,5 +69,3 @@ class CmdbAsset
     [id, site_name, fqdn, ip_address].join ','
   end
 end
-
-

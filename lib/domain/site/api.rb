@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../country/model'
 require_relative 'model'
 
 class InsightVMApi
@@ -225,11 +226,7 @@ class InsightVMApi
 
     # add site to shared credential
     site = fetch_site(site_id)
-    site_ids = [site.id]
-    shared_credentials = fetch_site_cyberark_credentials(site)
-    shared_credentials.each do |credential|
-      update_shared_credential_sites(credential:, site_ids:)
-    end
+    add_shared_credentials(site)
 
     # tag assets with business unit code, sub_area, app + utr,
     tag_names = assets.first.utr_tag_names
@@ -241,6 +238,14 @@ class InsightVMApi
 
     add_utr_tags(site_id:, tag_ids:)
     site_id
+  end
+
+  def add_shared_credentials(site)
+    site_ids = [site.id]
+    shared_credentials = fetch_site_cyberark_credentials(site)
+    shared_credentials.each do |credential|
+      update_shared_credential_sites(credential:, site_ids:)
+    end
   end
 
   def add_utr_tags(site_id:, tag_ids:)
@@ -257,14 +262,14 @@ class InsightVMApi
     post("/sites/#{site_id}/scans", params)
   end
 
-  def delete_site_by(site_idte_idte_idte_id:, name:)
-    raise 'Specify either id or name' if site_idte_id.nil? && name.nil?
+  def delete_site_by(id:, name:)
+    raise 'Specify either id or name' if id.nil? && name.nil?
 
-    if site_idte_id
-      delete_site(site_idte_id)
+    if id
+      delete_site(id)
     else
       site = fetch_site_by_name(name)
-      delete_site(site.site_idte_id)
+      delete_site(site.id)
     end
   end
 
@@ -300,14 +305,25 @@ class InsightVMApi
     )
   end
 
-  def fetch_site_cyberark_credentials(site)
-    country = site.country_code
-    return fetch_country_cyberark(country) if country_code != 'za'
+  def fetch_site_shared_credentials(site_id:)
+    site = fetch_site(site_id)
+    raise "Site #{site_id} not found" if site.nil?
 
-    domains = fetch_site_domains(site)
-    fetch_domain_cyberark(domains)
+    fetch_site_cyberark_credentials(site)
   end
 
+  def fetch_site_cyberark_credentials(site)
+    country_code = site.country_code
+    if country_code != 'za'
+      country = find_by_country_code site.country_code
+      Array(fetch_country_cyberark(country.name))
+    else
+      domains = fetch_site_domains(site)
+      fetch_domain_cyberark(domains)
+    end
+  end
 
-  def fetch_site_domains(site); end
+  def fetch_site_domains(site)
+    fetch_site_target_domains(site.id)
+  end
 end

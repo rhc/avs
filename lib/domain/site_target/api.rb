@@ -22,7 +22,7 @@ class InsightVMApi
     end
   end
 
-  def fetch_site_domains(site_id)
+  def fetch_site_target_domains(site_id)
     targets = fetch_site_included_targets(site_id)
     hosts = targets.select { |target| target.type == 'host' }
     # remove the host part of the fqdns

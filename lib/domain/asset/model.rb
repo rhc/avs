@@ -24,7 +24,7 @@ class CmdbAsset
                 :business_unit_code
 
   def initialize(
-    site_idte_idte_idte_id:,
+    id:,
     country_code:,
     business_unit:,
     business_unit_code:,
@@ -47,7 +47,7 @@ class CmdbAsset
     onboard_asset:
   )
 
-    @id = site_idte_id
+    @id = id
     @country_code = country_code
     @business_unit = business_unit
     @business_unit_code = business_unit_code

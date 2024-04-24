@@ -40,8 +40,8 @@ class App
     c.desc 'Get site by id'
     c.command :get do |g|
       g.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
-        puts "TODO get site id #{site_idte_id}"
+        id = options[GLI::Command::PARENT][:id]
+        puts "TODO get site id #{id}"
       end
     end
 
@@ -61,11 +61,39 @@ class App
       end
     end
 
+    c.desc 'List scan schedules'
+    c.command :scan_schedules do |g|
+      # TODO: add the switch
+      # g.switch [:enabled], desc: 'Only enabled schedules', default_value: nil, negatable: true
+      g.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        enabled = options[:enabled]
+        puts enabled
+        raise 'Site ID is required' if site_id.nil?
+
+        App.api.fetch_site_scan_schedules(site_id:) do |schedule|
+          puts schedule.to_json # if enabled.nil? || enabled == schedule.enabled
+        end
+      end
+    end
+
+    c.desc 'List shared credentials'
+    c.command :shared_credential_list do |scl|
+      scl.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        raise 'Site ID is required' if site_id.nil?
+
+        App.api.fetch_site_shared_credentials(site_id:).each do |shared_credential|
+          puts shared_credential
+        end
+      end
+    end
+
     c.desc 'Add tag to site'
     c.command :add_tag do |at|
       at.flag [:tag_name], desc: 'Tag Name'
       at.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
+        site_id = options[GLI::Command::PARENT][:id]
         tag_name = options[:tag_name]
         if tag_name.nil?
           puts 'Tag name is required'
@@ -73,7 +101,7 @@ class App
         end
         tag = App.api.get_or_create_tag(name: tag_name)
         puts "Tag #{tag.to_json}"
-        App.api.add_utr_tags(site_id: site_idte_id, tag_ids: [tag.id])
+        App.api.add_utr_tags(site_id:, tag_ids: [tag.id])
       end
     end
 

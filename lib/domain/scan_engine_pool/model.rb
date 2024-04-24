@@ -14,11 +14,12 @@ class ScanEngine
                 :sites,
                 :status
 
-  def initialize(site_idte_idte_idte_id:, name:, address: nil, content_version: nil,
+  def initialize(id:,
+                 name:, address: nil, content_version: nil,
                  is_AWSPreAuthEngine: nil, last_refreshed_date: nil,
                  last_updated_date: nil, port: nil, product_version: nil,
                  serial_number: nil, sites: [], status: nil)
-    @id = site_idte_id
+    @id = id
     @name = name
     @address = address
     @content_version = content_version

@@ -53,8 +53,6 @@ class Site
     matches ? matches[1] : nil
   end
 
-  def country; end
-
   def utr_digits
     utr_pattern = /:UTR(\d{5})$/
     digits = name.match(utr_pattern)

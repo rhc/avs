@@ -38,10 +38,10 @@ class InsightVMApi
     end
 
     # create the tag and update the cache
-    site_idte_idte_idte_id = create_tag(name:)
-    return nil if site_idte_id.nil?
+    id = create_tag(name:)
+    return nil if id.nil?
 
-    tag = fetch_tag(site_idte_id)
+    tag = fetch_tag(id)
     cached_tags[name] = tag
     tag
   end

@@ -8,8 +8,12 @@ class App
   command :country do |c|
     c.desc 'List countries'
     c.command :list do |l|
-      l.action do |_global_options, _options, _args|
+      l.flag :country_code
+      l.action do |_global_options, options, _args|
+        country_code = options[:country_code]
         App.db.all(Country).each do |country|
+          next if country_code && country.code != country_code
+
           puts country
         end
       end
