@@ -11,6 +11,7 @@ class InsightVMApi
     @all_shared_credentials ||= fetch_all_shared_credentials
   end
 
+  # TODO: use directly country code 2024-04-25 08:53
   def fetch_country_cyberark(country)
     credentials = all_shared_credentials
     credentials.find { |credential| credential.cyberark?(country) }
@@ -27,7 +28,7 @@ class InsightVMApi
   end
 
   def remove_shared_credential_sites(credential, site_ids = [])
-    to_be_removed = credential.sites && site_ids
+    to_be_removed = credential.sites & site_ids
     return if to_be_removed.empty?
 
     endpoint = "/shared_credentials/#{credential.id}"
@@ -56,20 +57,21 @@ class InsightVMApi
     # puts "Credentials #{credentials}"
     return [] if credentials.empty?
 
-    x = all_shared_credentials.select do |shared_credential|
+    all_shared_credentials.select do |shared_credential|
       credentials.include?(shared_credential.name)
     end
-    puts "Count #{x.count}"
-    x.to_a
   end
 
   # Add the site_id to the shared credential sites
   def update_shared_credential_sites(credential:, site_ids: [])
-    new_site_ids = credential_sites & site_ids
-    return if new_site_ids.empty?
+    new_site_ids = site_ids - credential.sites
+    if new_site_ids.empty?
+      puts "#{credential.name} contains already sites #{site_ids}"
+      return
+    end
 
     credential.sites += new_site_ids
-    endpoint = "/shared_credentials/#{credential_id}"
+    endpoint = "/shared_credentials/#{credential.id}"
     put(endpoint, credential)
   end
 
@@ -79,8 +81,8 @@ class InsightVMApi
     end
   end
 
-  def fetch_shared_credential(site_id)
-    fetch("/shared_credentials/#{site_id}") do |data|
+  def fetch_shared_credential(id)
+    fetch("/shared_credentials/#{id}") do |data|
       SharedCredential.from_json(data)
     end
   end

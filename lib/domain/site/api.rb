@@ -240,10 +240,19 @@ class InsightVMApi
     site_id
   end
 
+  def upsert_site_shared_credentials(site_id:)
+    site = fetch_site(site_id)
+    raise "Site #{site_id} does not exist." if site.nil?
+    raise "Site #{site.name} is not a UTR site" unless site.utr?
+
+    add_shared_credentials(site)
+  end
+
   def add_shared_credentials(site)
     site_ids = [site.id]
     shared_credentials = fetch_site_cyberark_credentials(site)
     shared_credentials.each do |credential|
+      puts "#{site.name} Shared Credential #{credential.name}"
       update_shared_credential_sites(credential:, site_ids:)
     end
   end

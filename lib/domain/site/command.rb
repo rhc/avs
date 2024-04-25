@@ -89,6 +89,16 @@ class App
       end
     end
 
+    c.desc 'Upsert site to shared credentials'
+    c.command :shared_credential_upsert do |scl|
+      scl.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        raise 'Site ID is required' if site_id.nil?
+
+        App.api.upsert_site_shared_credentials(site_id:)
+      end
+    end
+
     c.desc 'Add tag to site'
     c.command :add_tag do |at|
       at.flag [:tag_name], desc: 'Tag Name'
