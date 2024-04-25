@@ -99,6 +99,18 @@ class App
       end
     end
 
+    c.desc 'Upsert all UTR sites to shared credentials'
+    c.command :shared_credential_upsert_utrs do |scl|
+      scl.action do |_global_options, _options, _args|
+        puts 'Fetching UTR sites ...'
+        sites = App.api.fetch_utr_sites
+        sites.each do |site|
+          # puts site.name
+          App.api.upsert_site_shared_credentials(site_id: site.id)
+        end
+      end
+    end
+
     c.desc 'Add tag to site'
     c.command :add_tag do |at|
       at.flag [:tag_name], desc: 'Tag Name'

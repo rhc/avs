@@ -37,7 +37,6 @@ class InsightVMApi
   end
 
   def fetch_domain_cyberark(domains = [])
-    puts domains
     credentials = Set.new
     domains.map(&:downcase)
            .each do |domain|
