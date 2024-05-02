@@ -60,6 +60,17 @@ class App
       end
     end
 
+    c.desc 'Delete assets out of VM scope '
+    c.command :delete_asset_out_of_vm_scope do |dg|
+      dg.action do |_global_options, _options, _args|
+        puts 'Fetching out of VM scope asset_ids ...'
+        ids = App.db.fetch_out_of_vm_scope_asset_ids
+        puts "#{ids.size} assets out of vm scope are going to be deleted."
+        App.api.delete_assets(ids)
+        # TODO: delete the asset in the asset table
+      end
+    end
+
     c.desc 'Delete ghosts'
     c.command :delete_ghosts do |dg|
       dg.action do |_global_options, _options, _args|

@@ -62,7 +62,6 @@ class Db
     ENV['PGPASSFILE'] = '/Users/ckyony/.pgpass'
     command = "psql -d #{db} -U #{user} -h '#{host}' -p #{port} -c \"\\copy (SELECT * FROM #{view}) to STDOUT with CSV HEADER;\""
     result = `#{command}`
-    p result
     rows = CSV.new(result, headers: true, header_converters: :symbol)
     rows.map(&block)
   end

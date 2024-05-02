@@ -50,7 +50,7 @@ class InsightVMApi
         elsif response.code.zero?
           puts "HTTP request failed: #{response.return_message}"
         else
-          puts "HTTP request failed: #{response.code}"
+          puts "Delete asset #{asset_id} failed: #{response.code}"
         end
       end
     end
