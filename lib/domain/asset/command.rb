@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
+require 'typhoeus'
 require_relative 'model'
 
 class App
   desc 'Manage assets'
   command :asset do |c|
-    c.desc 'Filter assets by host name'
-    c.flag [:filter]
+    c.flag [:id], desc: 'Unique ID', type: Integer
     # c.desc 'List assets'
     # c.command :list do |l|
     #   l.desc 'UTR asset only'
@@ -35,27 +35,62 @@ class App
         end
       end
     end
-    c.desc 'Get asset by id'
-    c.command :get do |g|
-      g.desc 'ID'
-      g.flag :id
-      g.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[:id]
-        credential = App.api.fetch_shared_credential(site_idte_id)
-        puts credential.to_json
+
+    c.desc 'Delete asset'
+    c.command :delete do |d|
+      d.action do |_global_options, options, _args|
+        id = options[GLI::Command::PARENT][:id]
+        raise 'Id is required' if id.nil?
+
+        App.api.delete_asset(id)
       end
     end
-    # c.desc 'Delete scan engines'
-    # c.command :delete do |d|
-    #   d.desc 'scan engine unique ID'
-    #   d.flag [:id]
 
-    #   d.action do |_global_options, options, _args|
-    #     id = options[:id]
-    #     puts "Delete credential ##{id} ..."
-    #     # credentials = fetch_credentials(from: source)
-    #     # credentials.each { |credential| puts credential }
-    #   end
-    # end
+    c.desc 'Delete printers'
+    c.command :delete_printers do |dp|
+      dp.action do |_global_options, _options, _args|
+        asset_group = App.api.fetch_asset_group_by_name('Group Printers')
+        assets = asset_group.assets
+        raise 'The Group Printers asset group is currently empty.' if assets.zero?
+
+        puts "#{assets} printers are going to be deleted."
+        puts 'Fetching printer asset_ids ...'
+        ids = App.api.fetch_asset_group_assets(asset_group.id)
+        App.api.delete_assets(ids)
+      end
+    end
+
+    c.desc 'Delete ghosts'
+    c.command :delete_ghosts do |dg|
+      dg.action do |_global_options, _options, _args|
+        asset_group = App.api.fetch_asset_group_by_name('Ghosts')
+        assets = asset_group.assets
+        raise 'The Ghosts asset group is currently empty.' if assets.zero?
+
+        puts "#{assets} ghosts are going to be deleted."
+        puts 'Fetching ghost asset_ids ...'
+        ids = App.api.fetch_asset_group_assets(asset_group.id)
+        App.api.delete_assets(ids)
+      end
+    end
+
+    c.desc 'Delete asset group assets'
+    c.command :delete_asset_group_assets do |dg|
+      dg.flag :asset_group, desc: 'Asset group name'
+
+      dg.action do |_global_options, options, _args|
+        asset_group_name = options[:asset_group]
+        raise 'The asset group name is required' if asset_group_name.nil?
+
+        # asset_group = App.api.fetch_asset_group_by_name('Ghosts')
+        asset_group = App.api.fetch_asset_group_by_name(asset_group_name)
+        raise "#{asset_group_name} asset group does not exist." if asset_group.nil?
+
+        puts "#{asset_group.assets} ghosts are going to be deleted."
+        puts 'Fetching ghost asset_ids ...'
+        ids = App.api.fetch_asset_group_assets(asset_group.id)
+        App.api.delete_assets(ids)
+      end
+    end
   end
 end

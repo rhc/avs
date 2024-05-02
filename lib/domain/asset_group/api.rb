@@ -12,6 +12,15 @@ class InsightVMApi
     end
   end
 
+  def fetch_asset_group_assets(id, opts = { read_timeout: 200 })
+    asset_ids = []
+    endpoint = "/asset_groups/#{id}/assets"
+    fetch_all(endpoint, opts) do |asset_id|
+      asset_ids << asset_id
+    end
+    asset_ids
+  end
+
   def all_asset_groups(opts)
     asset_groups = []
     fetch_asset_groups(opts) do |e|
@@ -41,10 +50,10 @@ class InsightVMApi
     end
 
     # create the asset_group and update the cache
-    site_idte_idte_idte_id = create_asset_group(name:)
-    return nil if site_idte_id.nil?
+    id = create_asset_group(name:)
+    return nil if id.nil?
 
-    asset_group = fetch_asset_group(site_idte_id)
+    asset_group = fetch_asset_group(id)
     cached_asset_groups[name] = asset_group
     asset_group
   end
