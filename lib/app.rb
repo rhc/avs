@@ -8,6 +8,7 @@ require 'gli'
 require_relative '../lib/avs'
 require_relative '../lib/service/db'
 require_relative '../lib/service/api/insightvm'
+require_relative '../lib/service/api/nucleus'
 require_relative '../lib/service/mail'
 
 class App
@@ -18,6 +19,12 @@ class App
       'https://sbginsightvmconsole.standardbank.co.za:3780/api/3',
       'r7admin',
       'P@ssword1234'
+    )
+  end
+
+  def self.nucleus
+    @nucleus ||= NucleusApi.new(
+      '0980efc48b69d739cabc866ba20487c7'
     )
   end
 
