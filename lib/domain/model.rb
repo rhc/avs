@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/string/inflections'
+
 class Domain
   class Model
     def initialize(attributes = {})
@@ -27,7 +29,7 @@ class Domain
     end
 
     def self.table_name
-      name.downcase
+      name.underscore
     end
 
     def self.from_json(data)
