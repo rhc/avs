@@ -16,6 +16,10 @@ class Domain
           .map { |column| send(column.to_sym) }
     end
 
+    def self.primary_key
+      'id'
+    end
+
     # Ensure the columns method retrieves only valid attribute names
     def self.columns
       instance_methods.select { |m| m.to_s.end_with?('=') }

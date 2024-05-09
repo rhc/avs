@@ -7,9 +7,18 @@ class App
   command :operating_system do |c|
     c.desc 'List countries'
     c.command :list do |l|
-      l.action do |_global_options, _options, _args|
-        App.db.all(OperatingSystem).each do |os|
-          puts os
+      l.switch [:found_on_assets, 'found-on-assets'], desc: 'Operating system currently running on a asset'
+      l.action do |_global_options, options, _args|
+        active = options[:found_on_assets]
+        puts "Active #{active}"
+        if active
+          App.db.operating_system_found_on_assets.each do |os|
+            puts os
+          end
+        else
+          App.db.all(OperatingSystem).each do |os|
+            puts os
+          end
         end
       end
     end

@@ -7,9 +7,17 @@ class App
   command :software do |c|
     c.desc 'List softwares'
     c.command :list do |l|
-      l.action do |_global_options, _options, _args|
-        App.db.all(Software).each do |software|
-          puts software
+      l.switch [:found_on_assets, 'found-on-assets'], desc: 'Operating system currently running on a asset'
+      l.action do |_global_options, options, _args|
+        active = options[:found_on_assets]
+        if active
+          App.db.software_found_on_assets.each do |software|
+            puts software
+          end
+        else
+          App.db.all(Software).each do |software|
+            puts software
+          end
         end
       end
     end

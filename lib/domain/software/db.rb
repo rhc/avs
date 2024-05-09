@@ -5,15 +5,7 @@ require_relative 'model'
 require_relative '../../app'
 
 class Db
-  @countries = nil
-
-  def countries
-    @countries ||= fetch_all_countries
-  end
-
-  private
-
-  def fetch_all_countries
-    App.db.all(Country)
+  def software_found_on_assets
+    select(OperatingSystem, 'software_view')
   end
 end
