@@ -6,7 +6,8 @@ require_relative 'model'
 require_relative '../../app'
 
 class InsightVMApi
-  def find_by_country_code(cc)
-    App.db.countries.find { |country| country.code == cc }
+
+  def upsert_database_eos
+    # select the databases
   end
 end

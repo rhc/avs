@@ -1,0 +1,6 @@
+when instr(os.description, 'xxx') then
+			case 
+				when version = 'Unknown' then 'xxx'
+				when not instr(version, '.') then 'xxx ' || version
+			  else 'xxx ' || split_part(version,'.',1) || '.' || split_part(version,'.',2)
+			end
