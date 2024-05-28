@@ -101,11 +101,11 @@ class InsightVMApi
     result
   end
 
-  def delete_asset_group_by(site_idte_idte_idte_id: nil, name: nil)
-    raise 'Specify either id or name' if site_idte_id.nil? && name.nil?
+  def delete_asset_group_by(id: nil, name: nil)
+    raise 'Specify either id or name' if id.nil? && name.nil?
 
-    if site_idte_id
-      delete_asset_group(site_idte_id)
+    if id
+      delete_asset_group(id)
     else
       asset_group = fetch_asset_group_by_name(name)
       delete_asset_group(asset_group.site_idte_id) if asset_group

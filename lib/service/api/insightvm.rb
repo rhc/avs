@@ -107,10 +107,10 @@ class InsightVMApi
     end
   end
 
-  def put(endpoint, body)
+  def patch(endpoint, body)
     # Construct the request
     uri = URI("#{@base_url}#{endpoint}")
-    request = Net::HTTP::Put.new(uri)
+    request = Net::HTTP::Patch.new(uri)
     request['Content-Type'] = 'application/json'
     request['Authorization'] = @base_auth
     request.body = JSON.generate(body)
@@ -119,7 +119,23 @@ class InsightVMApi
 
     return if response.is_a?(Net::HTTPSuccess)
 
-    puts "Error creating site. Status code: #{response.code}, Response body: #{response.body}"
+    puts "Error PATCH #{endpoint}. Status code: #{response.code}\n Response body: #{response.body}"
+  end
+
+  def put(endpoint, body)
+    # Construct the request
+    uri = URI("#{@base_url}#{endpoint}")
+    request = Net::HTTP::Put.new(uri)
+    request['Content-Type'] = 'application/json'
+    request['Authorization'] = @base_auth
+    request.body = JSON.generate(body)
+
+    # Send the requesbody
+    response = @http.request(request)
+
+    return if response.is_a?(Net::HTTPSuccess)
+
+    puts "Error PUT #{endpoint}. Status code: #{response.code}, Response body: #{response.body}"
   end
 
   def fetch(endpoint, attempts = 0)

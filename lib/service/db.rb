@@ -42,12 +42,74 @@ class Db
     model_class.new(result.first.symbolize_keys)
   end
 
+  def grant_view_access(user, role, schema = 'public')
+    puts "user, role,schema #{[user, role, schema]}"
+    grant_existing_view_access(user, role, schema)
+    grant_future_view_access(user, role, schema)
+    @connection.close
+  end
+
+  def grant_existing_view_access(user, role, schema)
+    query = <<-SQL
+    DO $$
+    DECLARE
+      r RECORD;
+    BEGIN
+      FOR r IN (SELECT table_schema, table_name
+                FROM information_schema.views v
+                JOIN pg_views pv
+                  ON v.table_schema = pv.schemaname
+                  AND v.table_name = pv.viewname
+                WHERE table_schema = '#{schema}'
+                  AND pv.viewowner = '#{role}'
+                ) LOOP
+        EXECUTE 'GRANT SELECT ON ' || quote_ident(r.table_schema) || '.' || quote_ident(r.table_name) || ' TO ' || '#{user}';
+      END LOOP;
+    END $$ LANGUAGE plpgsql;
+    SQL
+
+    puts "query #{query}"
+
+    @connection.exec(query)
+  end
+
+  def grant_future_view_access(user, role, schema)
+    query = <<-SQL
+    ALTER DEFAULT PRIVILEGES FOR ROLE #{role} IN SCHEMA #{schema} GRANT SELECT ON TABLES TO #{user};
+    SQL
+    @connection.exec(query)
+  end
+
+  def bulk_copy(models = [])
+    return if models.empty?
+
+    model = models.first
+    table_name = model.class.table_name
+    columns = model.class.columns
+    data = models.map(&:to_csv)
+    bulk_copy_csv(table_name:, columns:, data:)
+  end
+
+  def bulk_copy_csv(table_name:, columns: [], data: [])
+    column_names = columns.empty? ? '' : "( #{columns.join(',')})"
+    @connection.copy_data("COPY #{table_name} #{column_names} from STDIN with (FORMAT csv)") do
+      data.each do |row|
+        connection.put_copy_data(row.join(',' + "\n"))
+      end
+    end
+  end
+
   def upsert(model)
     table_name = model.class.table_name
     columns = model.class.columns
     column_names = columns.join(', ')
     placeholders = columns.map.with_index(1) { |_, i| "$#{i}" }.join(', ')
-    conflict_target = model.class.primary_key # Unique identifier assumption
+    conflict_target = model.class.primary_key.join(', ') # Unique identifier assumption
+    # puts "---- conflict_target #{conflict_target}"
+    # puts "---- table_name: #{table_name}"
+    # puts "---- model.class: #{model.class}"
+    # puts "---- model.class.primary_key: #{model.class.primary_key}"
+
     update_assignments = columns.map do |column|
       "#{column} = EXCLUDED.#{column}"
     end.join(', ')
@@ -57,6 +119,22 @@ class Db
       VALUES (#{placeholders})
       ON CONFLICT (#{conflict_target}) DO UPDATE SET
       #{update_assignments};
+    SQL
+
+    @connection.exec_params(sql, model.to_csv)
+  rescue PG::Error => e
+    puts "An error occurred: #{e.message}"
+  end
+
+  def upsert_without_primary_key(model)
+    table_name = model.class.table_name
+    columns = model.class.columns
+    column_names = columns.join(', ')
+    placeholders = columns.map.with_index(1) { |_, i| "$#{i}" }.join(', ')
+
+    sql = <<-SQL
+      INSERT INTO #{table_name} (#{column_names})
+      VALUES (#{placeholders})
     SQL
 
     @connection.exec_params(sql, model.to_csv)

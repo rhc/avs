@@ -140,6 +140,20 @@ class App
       end
     end
 
+    c.desc 'Enable/Disable all UTR site schedule'
+    c.command 'schedule_utr_toggle' do |s|
+      s.switch :active, desc: 'Enable or disable the schedule'
+      s.action do |_global_options, options, _args|
+        enabled = options[:active]
+        puts 'Fetching UTR sites ...'
+        sites = App.api.fetch_utr_sites
+        sites.each do |site|
+          puts "Site #{site.name}"
+          App.api.toggle_utr_site_schedule(site:, enabled:)
+        end
+      end
+    end
+
     c.desc 'Create or update UTR site weekly schedule'
     c.command :schedule_utr do |s|
       s.action do |_global_options, options, _args|

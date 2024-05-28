@@ -24,7 +24,8 @@ class App
 
   def self.nucleus
     @nucleus ||= NucleusApi.new(
-      '0980efc48b69d739cabc866ba20487c7'
+      # '0980efc48b69d739cabc866ba20487c7'
+      'bfe1fb437929b786f7f81b6bdb3d5c92'
     )
   end
 
@@ -35,5 +36,27 @@ class App
 
   def self.mail
     MailService.instance
+  end
+
+  desc 'Manage Admin rights'
+  command :admin do |c|
+    c.desc 'Grant access to db views for a user'
+    c.command 'db:grant_view_access' do |g|
+      g.flag :user, desc: 'The user to grant access'
+      g.flag :role, desc: 'The role that creates views'
+      g.flag :schema, desc: 'The schema name', default_value: 'public'
+
+      g.action do |_global_options, options, _args|
+        user = options[:user]
+        role = options[:role]
+        schema = options[:schema]
+
+        if user.nil? || role.nil?
+          puts 'User and role are required'
+          exit 1
+        end
+        App.db.grant_view_access(user, role, schema)
+      end
+    end
   end
 end

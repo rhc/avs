@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'roo'
 require_relative 'model'
 
 class NucleusApi
@@ -12,10 +13,60 @@ class NucleusApi
     Project.new get(endpoint)
   end
 
-  def fetch_project_reports(id)
+  # Return the first project report with the correct name
+  def find_first_project_report_name(id, name)
+    condition = ->(report) { report.name == name }
+    find_project_report_if(id, condition) do |report|
+      return report
+    end
+    nil
+  end
+
+  def find_all_project_report_by(
+    id,
+    report_name:,
+    since: nil
+  )
+    since ||= Date.new(2024, 1, 1)
+    condition = lambda do |report|
+      report.name == report_name
+    end
+    reports = []
+    find_project_report_if(id, condition) do |report|
+      return reports if Date.parse(report.created_on) < since
+
+      reports << report
+    end
+    reports
+  end
+
+  def find_project_report_if(id, condition)
+    start = 0
+    limit = 50
+    found_reports = []
+    loop do
+      reports = fetch_project_reports(id, start:, limit:)
+      break if reports.empty?
+
+      reports.each do |report|
+        # puts "#{report.created_on}"
+        next unless condition.call(report)
+
+        if block_given?
+          yield(report)
+        else
+          found_reports << report
+        end
+      end
+      start += limit
+    end
+    found_reports unless block_given?
+  end
+
+  def fetch_project_reports(id, start: 0, limit: 1)
     endpoint = [Project.url_path, id, 'reports'].join('/')
-    reports = get(endpoint)
-    reports.map { |report| ProjectReport.new(report) }
+    reports = get(endpoint, { start:, limit: })
+    reports.map { |report| ProjectReport.new(report.merge('project_id' => id)) }
   end
 
   def download_project_report(id, report_id, filename = nil)
@@ -25,5 +76,27 @@ class NucleusApi
 
     filename ||= "data/project_#{id}_report_#{report_id}.xlsx"
     File.open(filename, 'wb') { |file| file.write(file_content) }
+  end
+
+  def extract_report_id(filename)
+    match_data = filename.match(/project_\d+_report_(\d+)\.xlsx/)
+    match_data[1] if match_data
+  end
+
+  def fetch_project_report_details(spreadsheet, report_id:, tabsheet_name: 'Scan Data')
+    xlsx = Roo::Excelx.new(spreadsheet)
+    xlsx.sheet(tabsheet_name)
+    headers = xlsx.row(1)
+    details = []
+    row_id = 1
+    xlsx.each_row_streaming(offset: 1) do |row|
+      values = row.map(&:value)
+      hash = Hash[headers.zip(values)]
+      hash['report_id'] = report_id
+      hash['row_id'] = row_id
+      details << ProjectReportDetail.new(hash)
+      row_id += 1
+    end
+    details
   end
 end

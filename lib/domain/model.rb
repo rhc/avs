@@ -11,13 +11,20 @@ class Domain
       end
     end
 
+    # Convert instance attributes to a hash
+    def to_hash
+      self.class.columns.each_with_object({}) do |attr, hash|
+        hash[attr] = send(attr.to_sym)
+      end
+    end
+
     def to_csv
       self.class.columns
           .map { |column| send(column.to_sym) }
     end
 
     def self.primary_key
-      'id'
+      ['id']
     end
 
     # Ensure the columns method retrieves only valid attribute names

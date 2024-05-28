@@ -160,12 +160,21 @@ class InsightVMApi
     create_utr_site_schedule(site_id:)
   end
 
+  def toggle_utr_site_schedule(site:, enabled:)
+    site_id = site.id
+    fetch_site_scan_schedules(site_id:) do |scan_schedule|
+      next if scan_schedule.enabled == enabled
+
+      scan_schedule.enabled = enabled
+      update_scan_schedule(scan_schedule, site_id:)
+    end
+  end
+
   def create_utr_site_schedule(site_id:)
     site = fetch_site(site_id)
     raise 'The site is not a valid UTR site' unless site.utr?
 
     scan_name = site.name
-    site.utr_digits
     slot = scan_slot(site.utr_digits)
     country_code = site.country_code
     scan_template_id = site.scan_template_id

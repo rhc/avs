@@ -20,7 +20,7 @@ class ScanSchedule
                 :start
 
   def initialize(
-    site_idte_idte_idte_id:,
+    id:,
     next_runtimes:,
     on_scan_repeat:,
     scan_engine_id:,
@@ -30,7 +30,7 @@ class ScanSchedule
     scan_name: nil,
     scan_template_id: nil
   )
-    @id = site_idte_id
+    @id = id
     @duration = duration
     @enabled = enabled
     @next_runtimes = next_runtimes
@@ -70,11 +70,11 @@ class ScanSchedule
       enabled:,
       id:,
       next_runtimes:,
-      on_scan_repeat:,
+      onScanRepeat: on_scan_repeat,
       repeat:,
-      scan_engine_id:,
-      scan_name:,
-      scan_template_id:,
+      scanEngineId: scan_engine_id,
+      scanName: scan_name,
+      scanTemplateId: scan_template_id,
       start:
     }.to_json
   end

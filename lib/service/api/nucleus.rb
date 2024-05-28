@@ -23,11 +23,12 @@ class NucleusApi
   end
 
   # Generic GET request
-  def get(path)
+  def get(path, params = {})
     request = Typhoeus::Request.new(
       "#{BASE_URL}#{path}",
       method: :get,
-      headers: @options[:headers]
+      headers: @options[:headers],
+      params:
     )
     run_request(request)
   end
@@ -86,8 +87,4 @@ class NucleusApi
       nil
     end
   end
-
-
-
-
 end

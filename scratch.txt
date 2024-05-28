@@ -1,6 +1,3 @@
-when instr(os.description, 'xxx') then
-			case 
-				when version = 'Unknown' then 'xxx'
-				when not instr(version, '.') then 'xxx ' || version
-			  else 'xxx ' || split_part(version,'.',1) || '.' || split_part(version,'.',2)
-			end
+UPDATE tasks
+SET data = '{"entry":"1713941012","description":"get quote","due":"2024-05-21","annotation_1715327644":"cancel this task if quote not received by tuesday","project":"home.winter","status":"pending","modified":"1716188876"}'
+WHERE uuid='bd8d938a-0a00-4be4-8522-59ee5ca5a188';

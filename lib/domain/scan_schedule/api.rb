@@ -57,6 +57,12 @@ class InsightVMApi
     delete("/sites/#{site_id}/scan_schedules", schedule_id)
   end
 
+  def update_scan_schedule(scan_schedule, site_id:)
+    id = scan_schedule.id
+    endpoint = "/sites/#{site_id}/scan_schedules/#{id}"
+    put(endpoint, scan_schedule)
+  end
+
   def create_scan_schedule(
     site_id:,
     scan_engine_id:,
