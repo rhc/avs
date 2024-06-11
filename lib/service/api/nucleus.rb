@@ -4,15 +4,21 @@ require 'typhoeus'
 require 'json'
 
 class NucleusApi
-  BASE_URL = 'https://orangecyberdefense.nucleussec.com/nucleus/api'
+  attr_reader :base_url,
+              :api_key,
+              :download_dir,
+              :archive_dir
 
-  def initialize(api_key)
+  def initialize(base_url:, api_key:, download_dir:, archive_dir:)
     @options = {
       headers: {
         'Accept' => 'application/json',
         'x-apikey' => api_key
       }
     }
+    @base_url = base_url
+    @download_dir = download_dir
+    @archive_dir = archive_dir
   end
 
   def fetch(model_class)
@@ -25,7 +31,7 @@ class NucleusApi
   # Generic GET request
   def get(path, params = {})
     request = Typhoeus::Request.new(
-      "#{BASE_URL}#{path}",
+      "#{base_url}#{path}",
       method: :get,
       headers: @options[:headers],
       params:
@@ -36,7 +42,7 @@ class NucleusApi
   # Generic POST request
   def post(path, body)
     request = Typhoeus::Request.new(
-      "#{BASE_URL}#{path}",
+      "#{base_url}#{path}",
       method: :post,
       headers: @options[:headers],
       body: body.to_json
@@ -47,7 +53,7 @@ class NucleusApi
   # Generic PUT request
   def put(path, body)
     request = Typhoeus::Request.new(
-      "#{BASE_URL}#{path}",
+      "#{base_url}#{path}",
       method: :put,
       headers: @options[:headers],
       body: body.to_json
@@ -71,7 +77,7 @@ class NucleusApi
 
   def download(path)
     download_request = Typhoeus::Request.new(
-      "#{BASE_URL}#{path}",
+      "#{base_url}#{path}",
       method: :get,
       headers: @options[:headers].merge('Accept' => 'application/octet-stream')
     )

@@ -26,17 +26,16 @@ class App
       end
     end
 
-    # c.desc 'Delete countries'
-    # c.command :delete do |d|
-    #   d.desc 'Shared country unique ID'
-    #   d.flag [:id]
+    c.desc 'Upload Microsoft product lifecycle'
+    c.command :upload_microsoft_product_lifecycle do |l|
+      l.flag :spreadsheet, desc: 'Excel spreasheet'
+      l.action do |_global_options, options, _args|
+        spreadsheet = options[:spreadsheet]
+        raise 'You must provide the /path/to/spreadsheet.xlsx' if spreadsheet.nil?
 
-    #   d.action do |_global_options, options, _args|
-    #     id = options[:id]
-    #     puts "Delete country ##{id} ..."
-    #     # countrys = fetch_countrys(from: source)
-    #     # countrys.each { |country| puts country }
-    #   end
-    # end
+        products = App.api.fetch_microsoft_product_lifecycle(spreadsheet, tabsheet_name: 'lifecycle_data')
+        App.db.save_microsoft_product_lifecycle(products)
+      end
+    end
   end
 end

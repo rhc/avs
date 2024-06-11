@@ -16,22 +16,29 @@ class App
   # TODO: use the ENV for host, db, port
   def self.api
     @api ||= InsightVMApi.new(
-      'https://sbginsightvmconsole.standardbank.co.za:3780/api/3',
-      'r7admin',
-      'P@ssword1234'
+      ENV['INSIGHT_API_URL'],
+      ENV['INSIGHT_API_USER'],
+      ENV['INSIGHT_API_PASSWORD']
     )
   end
 
   def self.nucleus
     @nucleus ||= NucleusApi.new(
-      # '0980efc48b69d739cabc866ba20487c7'
-      'bfe1fb437929b786f7f81b6bdb3d5c92'
+      base_url: ENV['NUCLEUS_API_URL'],
+      api_key: ENV['NUCLEUS_API_KEY'],
+      download_dir: ENV['NUCLEUS_DOWNLOAD_DIR'],
+      archive_dir: ENV['NUCLEUS_ARCHIVE_DIR']
     )
   end
 
   # TODO:  use the ENV for host, db, port
   def self.db
-    @db ||= Db.new(host: '127.0.0.1', db: 'avs', user: 'avs', port: 5433)
+    @db ||= Db.new(
+      host: ENV['DB_HOST'],
+      db: ENV['DB_NAME'],
+      user: ENV['DB_USER'],
+      port: ENV['DB_PORT']
+    )
   end
 
   def self.mail

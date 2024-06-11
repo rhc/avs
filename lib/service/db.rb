@@ -2,6 +2,7 @@
 
 require 'csv'
 require 'pg'
+require 'ruby-progressbar'
 require_relative '../domain/db'
 
 class Db
@@ -92,9 +93,16 @@ class Db
 
   def bulk_copy_csv(table_name:, columns: [], data: [])
     column_names = columns.empty? ? '' : "( #{columns.join(',')})"
+    progress_bar = ProgressBar.create(
+      title: "Copy to #{table_name}",
+      total: data.length,
+      format: '%a %B %p%% %t'
+    )
     @connection.copy_data("COPY #{table_name} #{column_names} from STDIN with (FORMAT csv)") do
       data.each do |row|
-        connection.put_copy_data(row.join(',' + "\n"))
+        sanitized_row = row.map { |cell| escape_csv_value(cell) }
+        connection.put_copy_data(sanitized_row.join(',') + "\n")
+        progress_bar.increment
       end
     end
   end
@@ -148,5 +156,18 @@ class Db
     result = `#{command}`
     rows = CSV.new(result, headers: true, header_converters: :symbol)
     rows.map(&block)
+  end
+
+  private
+
+  def escape_csv_value(value)
+    value = value.to_s
+    return '' if value.nil?
+
+    if value.include?(',') || value.include?('"') || value.include?("\n")
+      value = value.gsub('"', '""')
+      value = "\"#{value}\""
+    end
+    value
   end
 end

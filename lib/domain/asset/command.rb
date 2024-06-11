@@ -76,12 +76,12 @@ class App
       dg.action do |_global_options, _options, _args|
         asset_group = App.api.fetch_asset_group_by_name('Ghosts')
         assets = asset_group.assets
-        raise 'The Ghosts asset group is currently empty.' if assets.zero?
-
-        puts "#{assets} ghosts are going to be deleted."
-        puts 'Fetching ghost asset_ids ...'
-        ids = App.api.fetch_asset_group_assets(asset_group.id)
-        App.api.delete_assets(ids)
+        unless assets.zero?
+          puts "#{assets} ghosts are going to be deleted."
+          puts 'Fetching ghost asset_ids ...'
+          ids = App.api.fetch_asset_group_assets(asset_group.id)
+          App.api.delete_assets(ids)
+        end
       end
     end
 

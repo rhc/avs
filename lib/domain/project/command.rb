@@ -30,22 +30,25 @@ class App
 
     c.desc 'Upload project report details in a directory'
     c.command 'upload-scan-data' do |dl|
-      dl.flag 'directory-name'
+      dl.flag 'download-path', desc: 'Download directory'
+      dl.flag 'archive-path', desc: 'Archive directory'
       dl.action do |_global_options, options, _args|
-        directory_name = options['directory-name']
-        raise 'Directory name is required' if directory_name.nil?
-
-        Dir.glob("#{directory_name}/project_*_report_*.xlsx").each do |filename|
+        source_dir = options['download-path'] || App.nucleus.download_dir
+        archive_dir = options['archive-path'] || App.nucleus.archive_dir
+        Dir.glob("#{source_dir}/project_*_report_*.xlsx").each do |filename|
           puts filename
           report_id = App.nucleus.extract_report_id(filename)
           details = App.nucleus.fetch_project_report_details(filename, report_id:)
           App.db.save_project_report_details(details)
-          File.rename(filename, "uploaded/#{filename}")
+          File.rename(filename, "#{archive_dir}/#{File.basename(filename)}")
+        rescue StandardError => e
+          puts "Error processing file #{filename}: #{e.message}"
+          next
         end
       end
     end
 
-    c.desc 'Manage projects reports'
+    c.desc 'Manage project reports'
     c.command :reports do |r|
       r.flag [:report_id, 'report-id'], desc: 'Report ID', type: Integer
       r.desc 'List current reports in a project'
@@ -88,6 +91,8 @@ class App
 
           filename = options[:filename]
           raise 'Filename is required' if filename.nil?
+
+          puts 'Fetching details ...'
 
           details = App.nucleus.fetch_project_report_details(filename, report_id:)
           App.db.save_project_report_details(details)
@@ -145,7 +150,7 @@ class App
           puts 'Fetching reports ...'
           reports = App.nucleus.find_all_project_report_by(id, report_name:, since:)
           reports.each do |report|
-            puts "#{report.name} #{report.created_on}"
+            puts "#{report.name} ##{report.id} #{report.created_on}"
             App.db.upsert(report) if save
             App.nucleus.download_project_report(id, report.id) if download
           end

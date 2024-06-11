@@ -12,7 +12,6 @@ class Db
   def softwares(type)
     list = select(Software, 'software_view')
     return list if type == 'all'
-    
 
     return list.select(&:db?) if type == 'db'
 
@@ -23,5 +22,9 @@ class Db
 
   def product_in_cmdb_eos
     all(CmdbEos)
+  end
+
+  def save_microsoft_product_lifecycle(models)
+    bulk_copy(models)
   end
 end

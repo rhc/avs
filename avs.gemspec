@@ -24,5 +24,6 @@ spec = Gem::Specification.new do |s|
   s.add_runtime_dependency('mail', '~> 2.8.1')
   s.add_runtime_dependency('pg', '~> 1.5.6')
   s.add_runtime_dependency('roo', '~> 2.10.1')
+  s.add_runtime_dependency('ruby-progressbar', '~> 1.13.0')
   s.add_runtime_dependency('typhoeus', '~> 1.4.1')
 end

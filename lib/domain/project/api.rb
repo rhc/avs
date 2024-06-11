@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'roo'
+require 'ruby-progressbar'
 require_relative 'model'
 
 class NucleusApi
@@ -69,12 +70,13 @@ class NucleusApi
     reports.map { |report| ProjectReport.new(report.merge('project_id' => id)) }
   end
 
-  def download_project_report(id, report_id, filename = nil)
+  def download_project_report(id, report_id, dir = nil)
     endpoint = [Project.url_path, id, 'reports', report_id, 'download'].join('/')
     file_content = download(endpoint)
     raise 'Download failed.' if file_content.nil?
+    dir ||= download_dir
 
-    filename ||= "data/project_#{id}_report_#{report_id}.xlsx"
+    filename ||= "#{dir}/project_#{id}_report_#{report_id}.xlsx"
     File.open(filename, 'wb') { |file| file.write(file_content) }
   end
 
@@ -85,10 +87,16 @@ class NucleusApi
 
   def fetch_project_report_details(spreadsheet, report_id:, tabsheet_name: 'Scan Data')
     xlsx = Roo::Excelx.new(spreadsheet)
-    xlsx.sheet(tabsheet_name)
+    sheet = xlsx.sheet(tabsheet_name)
     headers = xlsx.row(1)
     details = []
     row_id = 1
+    total_rows = sheet.last_row - 1
+    progress_bar = ProgressBar.create(
+      title: "Fetching #{spreadsheet} details",
+      total: total_rows,
+      format: '%a %B %p%% %t'
+    )
     xlsx.each_row_streaming(offset: 1) do |row|
       values = row.map(&:value)
       hash = Hash[headers.zip(values)]
@@ -96,6 +104,7 @@ class NucleusApi
       hash['row_id'] = row_id
       details << ProjectReportDetail.new(hash)
       row_id += 1
+      progress_bar.increment
     end
     details
   end

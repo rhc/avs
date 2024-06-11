@@ -1,3 +1,4 @@
 .env
 *.gem
 data/*.xlsx
+uploaded/*.xlsx

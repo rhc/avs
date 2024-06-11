@@ -44,3 +44,45 @@ class CmdbEos < Domain::Model
     [name, version]
   end
 end
+
+class MicrosoftProductLifecycle < Domain::Model
+  attr_accessor :id,
+                :product,
+                :edition,
+                :release,
+                :support_policy,
+                :start_date,
+                :main_stream_date,
+                :extended_end_date,
+                :retirement_date,
+                :release_start_date,
+                :release_end_date,
+                :docs_url
+
+  def initialize(attributes = {})
+    remapped_attributes = attributes.transform_keys do |key|
+      case key
+      when 'Product' then 'product'
+      when 'Edition' then 'edition'
+      when 'Release' then 'release'
+      when 'SupportPolicy' then 'support_policy'
+      when 'StartDate' then 'start_date'
+      when 'MainStreamDate' then 'main_stream_date'
+      when 'ExtendedEndDate' then 'extended_end_date'
+      when 'RetirementDate' then 'retirement_date'
+      when 'ReleaseStartDate' then 'release_start_date'
+      when 'ReleaseEndDate' then 'release_end_date'
+      when 'DocsUrl' then 'docs_url'
+      else key
+      end
+    end
+    product = remapped_attributes['product']
+    edition = remapped_attributes['edition']
+    release = remapped_attributes['release']
+    remapped_attributes['id'] = [product, edition, release]
+                                .compact
+                                .select { |attr| attr.strip.length > 0 }
+                                .join(':')
+    super(remapped_attributes)
+  end
+end
