@@ -1,0 +1,53 @@
+= Firewall Design
+
+== Design
+
+[graphviz]
+----
+digraph network {
+
+  rankdir=LR;
+
+  subgraph cluster_internal {
+    label="Internal Network";
+    style=dashed;
+
+    node [shape=rectangle];
+    "Rapid7 Console";
+    scan_engine1 [label="Scan Engine 1"];
+    scan_engine2 [label="Scan Engine 2"];
+    internal_switch [label="Internal Switch"];
+  }
+
+  subgraph cluster_dmz {
+    label="DMZ";
+    style=dashed;
+
+    node [shape=rectangle];
+    dmz_scan_engine1 [label="Scan Engine in DMZ 1"];
+    dmz_scan_engine2 [label="Scan Engine in DMZ 2"];
+    dmz_switch [label="DMZ Switch"];
+  }
+
+  node [shape=ellipse];
+  external_fw [label="External Facing Firewall"];
+
+  internal_fw [shape=shield, label="Internal Facing Firewall"];
+
+  "Rapid7 Console" -> internal_switch;
+  scan_engine1 -> internal_switch;
+  scan_engine2 -> internal_switch;
+
+  internal_switch -> internal_fw;
+
+  internal_fw -> dmz_switch;
+
+  dmz_scan_engine1 -> dmz_switch;
+  dmz_scan_engine2 -> dmz_switch;
+
+  dmz_switch -> external_fw;
+
+  external_fw -> world [label="Internet"];
+}
+----
+

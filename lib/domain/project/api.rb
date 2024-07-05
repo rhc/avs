@@ -92,11 +92,13 @@ class NucleusApi
     details = []
     row_id = 1
     total_rows = sheet.last_row - 1
+
     progress_bar = ProgressBar.create(
       title: "Fetching #{spreadsheet} details",
       total: total_rows,
       format: '%a %B %p%% %t'
     )
+
     xlsx.each_row_streaming(offset: 1) do |row|
       values = row.map(&:value)
       hash = Hash[headers.zip(values)]

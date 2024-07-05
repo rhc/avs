@@ -9,10 +9,14 @@ class App
     c.flag [:id], desc: 'Unique ID', type: Integer
     c.flag [:name], desc: 'Project name'
     c.desc 'List Nucleus projects'
+
     c.command :list do |l|
       l.action do |_global_options, _options, _args|
+        puts 'id,name,description,org,groups'
         App.nucleus.fetch_projects.each do |project|
-          puts project.to_json
+          fields = [project.id, project.name, project.description, project.org, project.groups]
+          quoted_fields = fields.map { |field| "\"#{field}\"" }
+          puts quoted_fields.join(',')
         end
       end
     end

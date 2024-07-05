@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    avs (0.0.8)
+    avs (0.1.0)
       activesupport (~> 7.1.3.2)
       connection_pool (~> 2.4.1)
       dotenv (~> 3.1.0)

@@ -74,6 +74,7 @@ class App
     c.desc 'Delete ghosts'
     c.command :delete_ghosts do |dg|
       dg.action do |_global_options, _options, _args|
+        puts 'Api call'
         asset_group = App.api.fetch_asset_group_by_name('Ghosts')
         assets = asset_group.assets
         unless assets.zero?
