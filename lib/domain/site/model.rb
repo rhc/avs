@@ -1,30 +1,16 @@
 # frozen_string_literal: true
+require 'active_support/core_ext/string/inflections'
+require_relative '../model'
 
-class Site
-  attr_accessor :id, :name, :description, :risk_score, :scan_engine, :scan_template, :assets
 
-  def initialize(id:, name:, description:, risk_score:, scan_engine:, scan_template:, assets:)
-    @id = id
-    @name = name
-    @description = description
-    @risk_score = risk_score
-    @scan_engine = scan_engine
-    @scan_template = scan_template
-    @assets = assets
-  end
-
-  # data json comes from the API sites/get
-  def self.from_json(data)
-    Site.new(
-      id: data['id'],
-      name: data['name'],
-      description: data['description'],
-      risk_score: data['risk_score'],
-      scan_engine: data['scanEngine'],
-      scan_template: data['scanTemplate'],
-      assets: data['assets']
-    )
-  end
+class Site < Domain::Model
+  attr_accessor :id,
+                :name,
+                :description,
+                :risk_score,
+                :scan_engine,
+                :scan_template,
+                :assets
 
   def to_s
     [id, name, scan_engine, scan_template].join ','

@@ -5,12 +5,13 @@ v0.0.1, 2024-03.14
 :uri-freesoftware: https://www.gnu.org/philosophy/free-sw.html
 
 
-
-
 == For security engineers
-who need to interact with a Rapid7 Nexpose console,
+
+who need to interact with a Rapid7 InsightVM console,
 the *avs* gem is a command line utility
 that manage (e.g. create, list, update, and remove) the following entities:
+  - assets
+  - solutions
   - sites,
   - scans,
   - assets,

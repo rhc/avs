@@ -44,7 +44,10 @@ class Domain
     end
 
     def self.from_json(data)
-      new(data.transform_keys(&:to_sym)) # Transform keys from string to symbols if necessary
+      transformed_data = data.transform_keys do |key|
+        key.to_s.underscore.to_sym
+      end
+      new(transformed_data)
     end
 
     def to_s

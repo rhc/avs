@@ -1,4 +1,0 @@
- env GLI_DEBUG=true bundle exec avs project --id 1000204 reports find-all --report-name "SBSA Perimeter Vulnerability Details Report" --save 
- env GLI_DEBUG=true bundle exec avs project --id 1000204 reports find-all --report-name "Vulnerability Details" --save
- env GLI_DEBUG=true bundle exec avs project --id 2000077 reports find-all --report-name "SB Web App Vulnerability Details" --save
- env GLI_DEBUG=true bundle exec avs project --id 2000077 reports find-all --report-name "Vulnerability Details" --save 

@@ -1,0 +1,154 @@
+.
+├── Gemfile
+├── Gemfile.lock
+├── README.adoc
+├── Rakefile
+├── avs-0.0.1.gem
+├── avs-0.0.8.gem
+├── avs-0.0.9.gem
+├── avs-0.1.0.gem
+├── avs.gemspec
+├── avs.rdoc
+├── bin
+│   ├── 835.rb
+│   ├── avs
+│   ├── scrap-mscrt.rb
+│   └── scrapt-msrc.rb
+├── docs
+│   ├── diag-graphviz-md5-621c2224f857f3caf54e978b305f813c.png
+│   ├── diag-graphviz-md5-6df928a5b6054a65caabd91b77b33b93.png
+│   ├── diag-graphviz-md5-9d5a009a933f5af6b0a1040b16edf6ea.png
+│   ├── firewall-design.adoc
+│   ├── firewall-design.html
+│   ├── notes.adoc
+│   ├── sql
+│   │   └── project.sql
+│   └── upgrade-to-ubuntu-20.adoc
+├── lib
+│   ├── app.rb
+│   ├── avs
+│   │   └── version.rb
+│   ├── avs.rb
+│   ├── domain
+│   │   ├── api.rb
+│   │   ├── asset
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── asset_group
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── asset_tag
+│   │   ├── asset_vulnerability
+│   │   ├── country
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   ├── model.rb
+│   │   │   └── repo.rb
+│   │   ├── db.rb
+│   │   ├── model.rb
+│   │   ├── operating_system
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   ├── model.rb
+│   │   │   └── repo.rb
+│   │   ├── project
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── report
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── scan
+│   │   ├── scan_engine
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── scan_engine_pool
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── scan_schedule
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── fixture.rb
+│   │   │   ├── model.rb
+│   │   │   └── repeat.rb
+│   │   ├── search_criteria
+│   │   │   └── model.rb
+│   │   ├── shared_credential
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── site
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── site_target
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   ├── software
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   ├── model.rb
+│   │   │   └── repo.rb
+│   │   ├── tag
+│   │   │   ├── api.rb
+│   │   │   ├── command.rb
+│   │   │   ├── db.rb
+│   │   │   ├── fixture.rb
+│   │   │   └── model.rb
+│   │   └── vulnerability
+│   │       ├── api.rb
+│   │       ├── command.rb
+│   │       ├── db.rb
+│   │       ├── fixture.rb
+│   │       └── model.rb
+│   ├── models.rb
+│   ├── service
+│   │   ├── api
+│   │   │   ├── cisa_kev.rb
+│   │   │   ├── insightvm.rb
+│   │   │   ├── nucleus.rb
+│   │   │   └── swagger.json
+│   │   ├── csv2xlsx.rb
+│   │   ├── db.rb
+│   │   ├── mail.rb
+│   │   └── time_zone.rb
+│   └── tag
+├── project-structure.txt
+├── scratch.txt
+├── sql
+│   ├── country_update.sql
+│   └── project_create.sql
+└── test
+    ├── default_test.rb
+    ├── service
+    │   └── time_zone_test.rb
+    └── test_helper.rb
+
+32 directories, 120 files
