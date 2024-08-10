@@ -158,6 +158,48 @@ class Db
     rows.map(&block)
   end
 
+  def bulk_upsert(models = [])
+    return if models.empty?
+
+    model_class = models.first.class
+    table_name = model_class.table_name
+    columns = model_class.columns
+    column_names = columns.join(', ')
+    placeholders = columns.map.with_index(1) { |_, i| "$#{i}" }.join(', ')
+    conflict_target = model_class.primary_key.join(', ')
+
+    update_assignments = columns.map do |column|
+      "#{column} = EXCLUDED.#{column}"
+    end.join(', ')
+
+    sql = <<-SQL
+      INSERT INTO #{table_name} (#{column_names})
+      VALUES (#{placeholders})
+      ON CONFLICT (#{conflict_target}) DO UPDATE SET
+      #{update_assignments};
+    SQL
+
+    progress_bar = ProgressBar.create(
+      title: "Upserting to #{table_name}",
+      total: models.length,
+      format: '%a %B %p%% %t'
+    )
+
+    @connection.prepare('bulk_upsert_statement', sql)
+
+    @connection.transaction do
+      models.each do |model|
+        @connection.exec_prepared('bulk_upsert_statement', model.to_csv)
+        progress_bar.increment
+      end
+    end
+
+  rescue PG::Error => e
+    puts "An error occurred: #{e.message}"
+  ensure 
+    @connection.exec('DEALLOCATE bulk_upsert_statement')
+  end
+
   private
 
   def escape_csv_value(value)

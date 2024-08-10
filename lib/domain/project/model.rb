@@ -3,7 +3,7 @@
 require_relative '../model'
 
 class Project < Domain::Model
-  attr_accessor :id, :name, :description, :org, :tracking_methods, :groups
+  attr_accessor :id, :name, :description, :org, :tracking_method, :groups
 
   def initialize(attributes = {})
     remapped_attributes = attributes.transform_keys do |key|
@@ -140,6 +140,74 @@ class ProjectReportDetail < Domain::Model
       when 'Payload3' then 'payload3'
       when 'Payload4' then 'payload4'
       when 'Payload5' then 'payload5'
+      else key # For all other keys that do not need remapping
+      end
+    end
+    super(remapped_attributes) # Call the superclass's initialize method
+  end
+end
+
+class ProjectReportFinding < Domain::Model
+  SEVERITIES = %w[Critical High Medium Low Info].freeze
+
+  attr_accessor :id,
+                :report_id,
+                :name,
+                :description,
+                :severity,
+                :recommendation,
+                :cve_or_cwe,
+                :cvss_score,
+                :total_count,
+                :assets,
+                :teams,
+                :exploit_available,
+                :iava,
+                :mitigation,
+                :exploit_in_wild,
+                :exploit_rating,
+                :mandiant_ease_of_attack,
+                :exploit_consequence,
+                :mitigations,
+                :mandiant_risk_rating,
+                :zero_day,
+                :associated_malware,
+                :associated_malware_types,
+                :threat_actors,
+                :epss_score,
+                :is_cisa_bod_22_01_vulnerability
+
+  def table_name
+    'project_report_finding'
+  end
+
+  def self.primary_key
+    %w[id report_id]
+  end
+
+  def initialize(attributes = {})
+    remapped_attributes = attributes.transform_keys do |key|
+      case key
+      when 'ID' then 'id'
+      when 'Name' then 'name'
+      when 'Description' then 'description'
+      when 'Recommendation' then 'recommendation'
+      when 'CVE/CWE' then 'cve_or_cwe'
+      when 'CVSS Score' then 'cvss_score'
+      when 'Total Count' then 'total_count'
+      when 'Unique Instance List' then 'assets'
+      when 'Teams' then 'teams'
+      when 'Exploit Available' then 'exploit_available'
+      when 'IAVA' then 'iava'
+      when 'Mitigation' then 'mitigation'
+      when 'Exploit in Wild' then 'exploit_in_wild'
+      when 'Mandiant Ease of Attack' then 'mandiant_ease_of_attack'
+      when 'Zero Day' then 'zero_day'
+      when 'Associated Malware' then 'associated_malware'
+      when 'Associated Malware Types' then 'associated_malware_types'
+      when 'Threat actors' then 'threat actors'
+      when 'EPSS score' then 'epss_score'
+      when 'CISA BOD 22-01 Vulnerability' then 'is_cisa_bod_22_01_vulnerability'
       else key # For all other keys that do not need remapping
       end
     end

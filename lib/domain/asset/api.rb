@@ -32,6 +32,21 @@ class InsightVMApi
     puts 'All assets in the group have been successfully deleted.'
   end
 
+  def fetch_site_assets(site_id:)
+    fetch_all("/sites/#{site_id}/assets") do |resource|
+      yield Asset.from_json(resource)
+    end
+  end
+
+  def delete_site_assets(site_id:)
+    asset_ids = []
+    fetch_site_assets(site_id:) do |asset|
+      puts "Asset ##{asset.id} #{asset.ip} #{asset.host_name}"
+      asset_ids << asset.id
+    end
+    delete_assets(asset_ids)
+  end
+
   private
 
   # Creates a Typhoeus request for deleting an asset

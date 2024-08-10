@@ -74,6 +74,7 @@ class NucleusApi
     endpoint = [Project.url_path, id, 'reports', report_id, 'download'].join('/')
     file_content = download(endpoint)
     raise 'Download failed.' if file_content.nil?
+
     dir ||= download_dir
 
     filename ||= "#{dir}/project_#{id}_report_#{report_id}.xlsx"
@@ -92,9 +93,10 @@ class NucleusApi
     details = []
     row_id = 1
     total_rows = sheet.last_row - 1
+    return [] if total_rows.zero?
 
     progress_bar = ProgressBar.create(
-      title: "Fetching #{spreadsheet} details",
+      title: "Fetching #{total_rows} details",
       total: total_rows,
       format: '%a %B %p%% %t'
     )
@@ -109,5 +111,38 @@ class NucleusApi
       progress_bar.increment
     end
     details
+  end
+
+  def fetch_project_report_findings(spreadsheet, report_id:)
+    ProjectReportFinding::SEVERITIES.flat_map do |severity|
+      fetch_project_report_vulns(spreadsheet, report_id:, tabsheet_name: severity)
+    end
+  end
+
+  def fetch_project_report_vulns(spreadsheet, report_id:, tabsheet_name:)
+    xlsx = Roo::Excelx.new(spreadsheet)
+    return [] unless xlsx.sheets.include?(tabsheet_name)
+
+    sheet = xlsx.sheet(tabsheet_name)
+    headers = xlsx.row(1)
+    total_rows = sheet.last_row - 1
+    return [] if total_rows.zero?
+
+    findings = []
+    progress_bar = ProgressBar.create(
+      title: "Fetching #{total_rows} #{tabsheet_name} findings",
+      total: total_rows,
+      format: '%a %B %p%% %t'
+    )
+
+    xlsx.each_row_streaming(offset: 1) do |row|
+      values = row.map(&:value)
+      hash = Hash[headers.zip(values)]
+      hash['severity'] = tabsheet_name
+      hash['report_id'] = report_id
+      findings << ProjectReportFinding.new(hash)
+      progress_bar.increment
+    end
+    findings
   end
 end

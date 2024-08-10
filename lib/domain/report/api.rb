@@ -52,9 +52,6 @@ class InsightVMApi
     payload = report.to_hash.merge({ 'owner' => owner_id })
     payload.delete('id')
     payload.delete_if { |_k, v| v.nil? }
-    # frequency = payload['frequency']
-    # frequency.delete('nextRuntimes')
-    # payload.merge { 'frequency' => frequency }
     endpoint = "/reports/#{report.id}"
     put(endpoint, payload)
   end

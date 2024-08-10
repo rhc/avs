@@ -1,15 +1,16 @@
 # frozen_string_literal: true
 
 class Site
-  attr_accessor :id, :name, :description, :risk_score, :scan_engine, :scan_template
+  attr_accessor :id, :name, :description, :risk_score, :scan_engine, :scan_template, :assets
 
-  def initialize(id:, name:, description:, risk_score:, scan_engine:, scan_template:)
+  def initialize(id:, name:, description:, risk_score:, scan_engine:, scan_template:, assets:)
     @id = id
     @name = name
     @description = description
     @risk_score = risk_score
     @scan_engine = scan_engine
     @scan_template = scan_template
+    @assets = assets
   end
 
   # data json comes from the API sites/get
@@ -20,7 +21,8 @@ class Site
       description: data['description'],
       risk_score: data['risk_score'],
       scan_engine: data['scanEngine'],
-      scan_template: data['scanTemplate']
+      scan_template: data['scanTemplate'],
+      assets: data['assets']
     )
   end
 

@@ -41,7 +41,7 @@ class App
     end
 
     c.desc 'Update owner'
-    c.command :update do |g|
+    c.command 'update-owner' do |g|
       g.flag [:owner_id, 'owner-id']
       g.action do |_global_options, options, _args|
         id = options[GLI::Command::PARENT][:id]
@@ -57,8 +57,8 @@ class App
       end
     end
 
-    c.desc 'Update owner of all xxx report'
-    c.command :update_xxx do |gx|
+    c.desc 'Update all xxx report\'s owner'
+    c.command 'update-owner-xxx' do |gx|
       gx.flag ['xxx-owner-id'], desc: 'xxx report owner id'
       gx.action do |_global_options, options, _args|
         owner_id = options['xxx-owner-id']

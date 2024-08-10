@@ -4,7 +4,7 @@ require 'typhoeus'
 require_relative 'model'
 
 class App
-  desc 'Manage projects'
+  desc 'Manage Nucleus projects'
   command :project do |c|
     c.flag [:id], desc: 'Unique ID', type: Integer
     c.flag [:name], desc: 'Project name'
@@ -32,7 +32,19 @@ class App
       end
     end
 
-    c.desc 'Upload project report details in a directory'
+    c.desc 'Save Nucleus project by Id'
+    c.command :save do |l|
+      l.action do |_global_options, options, _args|
+        id = options[GLI::Command::PARENT][:id]
+        raise 'The ID is required' if id.nil?
+
+        project = App.nucleus.fetch_project(id)
+        App.db.upsert(project)
+        puts "Project #{project.id} - #{project.name} saved successfully."
+      end
+    end
+
+    c.desc 'Upload project report details found in a directory'
     c.command 'upload-scan-data' do |dl|
       dl.flag 'download-path', desc: 'Download directory'
       dl.flag 'archive-path', desc: 'Archive directory'
@@ -43,11 +55,27 @@ class App
           puts filename
           report_id = App.nucleus.extract_report_id(filename)
           details = App.nucleus.fetch_project_report_details(filename, report_id:)
+          vulns = App.nucleus.fetch_project_report_findings(filename, report_id:)
           App.db.save_project_report_details(details)
+          App.db.save_project_report_findings(vulns)
           File.rename(filename, "#{archive_dir}/#{File.basename(filename)}")
         rescue StandardError => e
           puts "Error processing file #{filename}: #{e.message}"
           next
+        end
+      end
+    end
+
+    c.desc 'Download missing project report details'
+    c.command 'download-missing-details' do |dl|
+      dl.flag 'download-path', desc: 'Download directory'
+      dl.action do |_global_options, options, _args|
+        download_dir = options['download-path'] || App.nucleus.download_dir
+        App.db.fetch_view('project_report_detail_missing_view') do |record|
+          project_id = record[:project_id]
+          report_id = record[:report_id]
+          puts "Download #{download_dir}/project_#{project_id}_report_#{report_id}"
+          App.nucleus.download_project_report(project_id, report_id, download_dir)
         end
       end
     end
@@ -73,7 +101,7 @@ class App
         end
       end
 
-      r.desc 'Download a report in a project'
+      r.desc 'Download a project report'
       r.command :download do |dl|
         dl.action do |_global_options, options, _args|
           id = options[GLI::Command::PARENT][GLI::Command::PARENT][:id]
@@ -98,21 +126,6 @@ class App
 
           puts 'Fetching details ...'
 
-          details = App.nucleus.fetch_project_report_details(filename, report_id:)
-          App.db.save_project_report_details(details)
-        end
-      end
-
-      r.desc 'Upload infrastructure reports'
-      r.command :upload_infrastructure_reports do |l|
-        l.action do |_global_options, _options, _args|
-          id = 1_000_204
-          report_name = 'SBSA Perimeter Vulnerability Details Report'
-          report = App.nucleus.find_project_report_name(id, report_name)
-          raise "#{report_name} report was not found" if report.nil?
-
-          filename = "data/project_#{id}_report_#{report_id}"
-          App.nucleus.download_project_report(id, report.id, filename)
           details = App.nucleus.fetch_project_report_details(filename, report_id:)
           App.db.save_project_report_details(details)
         end

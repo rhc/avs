@@ -1,4 +1,26 @@
-# frozen_string_literal: true
+# frozen_string_literal:true
+
+require_relative '../model'
+
+class Asset < Domain::Model
+  attr_accessor :id, :host_name, :ip, :mac, :os, :os_certainty, :type, :risk_score,
+                :assessed_for_vulnerabilities, :vulnerabilities
+
+  def self.from_json(data)
+    new(
+      id: data['id'],
+      host_name: data['hostName'],
+      ip: data['ip'],
+      mac: data['mac'],
+      os: data['os'],
+      os_certainty: data['osCertainty'],
+      type: data['type'],
+      risk_score: data['riskScore'],
+      assessed_for_vulnerabilities: data['assessedForVulnerabilities'],
+      vulnerabilities: data['vulnerabilities']
+    )
+  end
+end
 
 class CmdbAsset
   attr_accessor :id,

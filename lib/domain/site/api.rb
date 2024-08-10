@@ -287,7 +287,7 @@ class InsightVMApi
       delete_site(id)
     else
       site = fetch_site_by_name(name)
-      delete_site(site.id)
+      delete_site(site.id) unless site.nil?
     end
   end
 
@@ -297,11 +297,13 @@ class InsightVMApi
     site = fetch_site(site_id)
     raise "Site #{site_id} does not exist." if site.nil?
 
+    puts "Site #{site.id} #{site.name}"
+
     puts 'Delete asset group with the same name as the site'
     delete_asset_group_by(name: site.name)
 
-    puts "Delete assets from site #{site_id}"
-    delete("/sites/#{site_id}/assets", '')
+    puts "Deleting #{site.assets} assets from site #{site_id}"
+    delete_site_assets(site_id:)
     puts "Delete site #{site_id}"
     delete('/sites', site_id)
   end

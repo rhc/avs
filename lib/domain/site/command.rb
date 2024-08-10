@@ -196,6 +196,19 @@ class App
       end
     end
 
+    c.desc 'List assets for a site'
+    c.command 'list:assets' do |la|
+      la.action do |_global_options, options, _args|
+        site_id = options[GLI::Command::PARENT][:id]
+        raise 'Site ID is required' if site_id.nil?
+
+        puts "Fetching assets for site ID: #{site_id}"
+        App.api.fetch_site_assets(site_id:) do |asset|
+          puts asset.to_json
+        end
+      end
+    end
+
     c.desc 'Create sites for business unit'
     c.command :new do |n|
       n.flag [:bu, :business_unit, 'business-unit'], desc: 'Business unit'
@@ -222,9 +235,9 @@ class App
     c.desc 'Delete site by id or name'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
+        id = options[GLI::Command::PARENT][:id]
         name = options[GLI::Command::PARENT][:name]
-        App.api.delete_site_by site_idte_idte_idte_id:, name:
+        App.api.delete_site_by id:, name:
       end
     end
 
