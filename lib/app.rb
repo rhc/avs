@@ -16,9 +16,9 @@ class App
   # TODO: use the ENV for host, db, port
   def self.api
     @api ||= InsightVMApi.new(
-      ENV['INSIGHTVM_API_URL'],
-      ENV['INSIGHTVM_API_USER'],
-      ENV['INSIGHTVM_API_PASSWORD']
+      base_url: ENV['INSIGHTVM_API_URL'],
+      username: ENV['INSIGHTVM_API_USER'],
+      password: ENV['INSIGHTVM_API_PASSWORD']
     )
   end
 

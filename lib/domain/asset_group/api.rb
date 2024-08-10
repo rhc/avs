@@ -109,14 +109,14 @@ class InsightVMApi
       delete_asset_group(id)
     else
       asset_group = fetch_asset_group_by_name(name)
-      delete_asset_group(asset_group.site_idte_id) if asset_group
+      delete_asset_group(asset_group.id) if asset_group
     end
   end
 
   private
 
-  def delete_asset_group(site_id)
-    puts "Delete asset_group #{site_id}"
-    delete('/asset_groups', site_id)
+  def delete_asset_group(id)
+    puts "Delete asset_group #{id}"
+    delete('/asset_groups', id)
   end
 end

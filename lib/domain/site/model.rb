@@ -1,7 +1,6 @@
 # frozen_string_literal: true
-require 'active_support/core_ext/string/inflections'
-require_relative '../model'
 
+require_relative '../model'
 
 class Site < Domain::Model
   attr_accessor :id,
@@ -58,16 +57,13 @@ class Site < Domain::Model
 end
 
 class CmdbSite
-  attr_accessor :name, :country_code, :business_unit, :sub_area, :application, :utr
-
-  def initialize(name:, country_code:, business_unit:, sub_area:, application:, utr:)
-    @name = name
-    @country_code = country_code
-    @business_unit = business_unit
-    @sub_area = sub_area
-    @application = application
-    @utr = utr
-  end
+  attr_accessor :name,
+                :country_code,
+                :business_unit,
+                :sub_area,
+                :application,
+                :utr,
+                :network
 
   def self.from_csv(row)
     CmdbSite.new(
@@ -76,11 +72,12 @@ class CmdbSite
       business_unit: row[:business_unit],
       sub_area: row[:sub_area],
       application: row[:application],
-      utr: row[:utr]
+      utr: row[:utr],
+      network: row[:network]
     )
   end
 
   def to_s
-    [name, country_code, business_unit, sub_area, application, utr].join ','
+    [name, country_code, network, business_unit, sub_area, application, utr].join ','
   end
 end
