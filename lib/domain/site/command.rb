@@ -25,8 +25,31 @@ class App
       end
     end
 
+    c.desc 'List Country discovery sites'
+    c.command 'list:country_discovery' do |l|
+      l.action do |_global_options, _options, _args|
+        App.api.fetch_country_discovery_sites do |discovery_site|
+          puts "#{discovery_site.name}"
+          puts "#{discovery_site.country} - #{discovery_site.network_zone}"
+          puts "#{discovery_site.target_names}"
+          puts
+        end
+      end
+    end
+
+    c.desc 'Save country discovery sites'
+    c.command 'save:country_discovery' do |l|
+      l.action do |_global_options, _options, _args|
+        App.api.fetch_country_discovery_sites do |site|
+          puts "Saving #{site.name} ..."
+          puts "Save #{site.targets.length} targets"
+          App.db.save_country_discovery_site(site)
+        end
+      end
+    end
+
     c.desc 'List UTR sites from cmdb'
-    c.command :utr_from_cmdb do |ldb|
+    c.command 'list:utr_from_cmdb' do |ldb|
       ldb.action do |_global_options, options, _args|
         name = options[GLI::Command::PARENT][:name]&.downcase
         App.db.fetch_utr_site_from_cmdb do |site|
@@ -121,7 +144,7 @@ class App
           puts 'Tag name is required'
           exit
         end
-        tag = App.api.get_or_create_tag(name: tag_name)
+        tag = App.api.upsert_tag(name: tag_name)
         puts "Tag #{tag.to_json}"
         App.api.add_utr_tags(site_id:, tag_ids: [tag.id])
       end

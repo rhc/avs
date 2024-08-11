@@ -24,7 +24,7 @@ class InsightVMApi
   #   return the tag if the cache contains the name
   #   create the custom tag with name
   #   return tag
-  def get_or_create_tag(name:, cached_tags: {})
+  def upsert_tag(name:, cached_tags: {})
     # Check if the tag name already exists in the cache
     from_cache = cached_tags[name]
     return from_cache unless from_cache.nil?

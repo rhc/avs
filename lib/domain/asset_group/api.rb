@@ -59,7 +59,6 @@ class InsightVMApi
   end
 
   def fetch_asset_group_by_name(name)
-    puts 'fetch_asset_group_by_name'
     fetch_all('/asset_groups', name:) do |resource|
       asset_group = AssetGroup.from_json(resource)
       return asset_group if asset_group.name == name

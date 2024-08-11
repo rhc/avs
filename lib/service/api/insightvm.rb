@@ -6,8 +6,7 @@ require 'base64'
 require_relative '../../domain/api'
 
 # InsightVMApi class provides an interface for interacting with the InsightVM API.
-# It handles authentication, request building, and response parsing for various
-# API endpoints.
+# It handles request building, and response parsing for various API endpoints.
 #
 # @attr_reader [String] base_url The base URL for the InsightVM API
 # @attr_reader [String] base_auth The Basic Authentication string used for requests
@@ -180,6 +179,11 @@ class InsightVMApi
     else
       { error: "HTTP request failed: #{response.code}" }
     end
+  end
+
+  def confirm_action(prompt)
+    print "#{prompt} (y/n): "
+    gets.chomp.downcase == 'y'
   end
 end
 

@@ -32,6 +32,24 @@ class InsightVMApi
     nil
   end
 
+  def fetch_site_included_targets(_site_id)
+    fetch_all_targets
+  end
+
+  def fetch_country_discovery_sites
+    fetch_sites do |site|
+      next unless site.country_discovery?
+
+      targets = fetch_site_included_targets(site.id)
+      discovery_site = DiscoverySite.new(
+        id: site.id,
+        name: site.name,
+        targets:
+      )
+      yield discovery_site
+    end
+  end
+
   def fetch_utr_sites
     sites = []
     fetch_sites do |site|
@@ -40,58 +58,82 @@ class InsightVMApi
     sites
   end
 
-  def delete_utr_sites
+  def delete_utr_sites(confirmation: true)
     puts 'Fetching UTR sites can take up to 5 minutes, patience ...'
     sites = fetch_utr_sites
     # TODO: add progress bar
     raise 'No UTR sites were found.' if sites.empty?
 
     # TODO: ask for confirmation
-    puts "#{sites.count} sites will be deleted. Are you sure?"
+    prompt = "#{sites.count} sites will be deleted. Are you sure?"
+    if confirmation && !confirm_action(prompt)
+      puts 'Operation cancelled. No UTR sites were deleted.'
+      return
+    end
+
     sites.each do |site|
       next unless site.utr? # double-check
 
+      puts ''
       puts "Deleting site #{site.name}"
 
       delete_site(site.id)
     end
   end
 
-  def create_site(
-    name:,
-    description:,
-    engine_id:,
-    scan_template_id:,
-    importance: 'normal',
-    included_targets: [],
-    excluded_targets: [],
-    included_asset_group_ids: [],
-    excluded_asset_group_ids: []
-  )
-    # Construct the request body
+  # Creates a new site with the given parameters
+  #
+  # @param options [Hash] Options for site creation
+  # @option options [String] :name The name of the site (required)
+  # @option options [String] :description The description of the site (required)
+  # @option options [String] :engine_id The ID of the scan engine to use (required)
+  # @option options [String] :scan_template_id The ID of the scan template to use (required)
+  # @option options [String] :importance ('normal') The importance of the site
+  # @option options [Array<String>] :included_targets ([]) Targets to include in the scan
+  # @option options [Array<String>] :excluded_targets ([]) Targets to exclude from the scan
+  # @option options [Array<String>] :included_asset_group_ids ([]) Asset group IDs to include
+  # @option options [Array<String>] :excluded_asset_group_ids ([]) Asset group IDs to exclude
+  # @return [String, nil] The ID of the created site, or nil if creation failed
+  # @raise [ArgumentError] If any required option is missing
+  def create_site(options = {})
+    default_options = {
+      importance: 'normal',
+      included_targets: [],
+      excluded_targets: [],
+      included_asset_group_ids: [],
+      excluded_asset_group_ids: []
+    }
+
+    options = default_options.merge(options)
+
+    required_keys = %i[name description engine_id scan_template_id]
+    missing_keys = required_keys.select { |key| options[key].nil? }
+    raise ArgumentError, "Missing required options: #{missing_keys.join(',')}" if missing_keys.any?
+
     params = {
-      name:,
-      description:,
-      importance:,
-      engineId: engine_id,
-      scanTemplateId: scan_template_id,
+      name: options[:name],
+      description: options[:description],
+      importance: options[:importance],
+      engineId: options[:engine_id],
+      scanTemplateId: options[:scan_template_id],
       scan: {
         assets: {
           includedTargets: {
-            addresses: included_targets
+            addresses: options[:included_targets]
           },
           excludedTargets: {
-            addresses: excluded_targets
+            addresses: options[:excluded_targets]
           },
           includedAssetGroups: {
-            assetGroupIDs: included_asset_group_ids
+            assetGroupIDs: options[:included_asset_group_ids]
           },
           excludedAssetGroups: {
-            assetGroupIDs: excluded_asset_group_ids
+            assetGroupIDs: options[:excluded_asset_group_ids]
           }
         }
       }
     }
+
     result = post('/sites', params)
     result&.dig('id')
   end
@@ -115,15 +157,15 @@ class InsightVMApi
         next
       end
 
-      puts "\tCreate asset group: #{site_name}"
+      puts "\t Create asset group: #{site_name}"
       create_asset_group_for(site_id:, site_name:)
 
-      puts "\tSchedule the scan"
+      puts "\t Schedule the scan"
       # TODO
 
       next unless starts_discovery
 
-      puts "\tStart discovery scan"
+      puts "\t Start discovery scan"
       starts_discovery_scan(site_id:)
     end
   end
@@ -199,10 +241,10 @@ class InsightVMApi
     end
   end
 
-  # return site.id if success
-  # only return the onboard assets
-  def create_utr_site_from(
-    site_name:, cmdb_assets:, cached_tags: {}
+  def create_utr_discovery_site_from(
+    site_name:,
+    cmdb_assets:,
+    cached_tags: {}
   )
     assets = cmdb_assets.select { |asset| asset.site_name == site_name }
                         .select(&:onboard?)
@@ -237,11 +279,63 @@ class InsightVMApi
     site = fetch_site(site_id)
     add_shared_credentials(site)
 
-    # tag assets with business unit code, sub_area, app + utr,
+    # tag assets with business unit code, sub_area, app + utr,  network_zone
     tag_names = assets.first.utr_tag_names
     tags = tag_names.map do |tag_name|
       puts "\tAdd tag: #{tag_name}"
-      get_or_create_tag(name: tag_name, cached_tags:)
+      upsert_tag(name: tag_name, cached_tags:)
+    end
+    tag_ids = tags.map(&:id)
+
+    add_utr_tags(site_id:, tag_ids:)
+    site_id
+  end
+
+  # return site.id if success
+  # Note: only return the onboard assets
+  def create_utr_site_from(
+    site_name:,
+    cmdb_assets:,
+    cached_tags: {}
+  )
+    assets = cmdb_assets.select { |asset| asset.site_name == site_name }
+                        .select(&:onboard?)
+
+    return if assets.empty?
+
+    country = assets.first.country
+    targets = assets.map(&:fqdn)
+    scan_engine_pool = fetch_country_scan_engine_pools(country)
+    # puts "Scan engine pool #{scan_engine_pool}"
+    engine_id = scan_engine_pool[:id]
+    scan_template_id = fetch_discovery_scan_template_id(country)
+    puts
+    puts '-' * 40
+    puts "Site #{site_name}\nTargets: #{targets.length} #{targets.join(' ')}"
+    puts '-' * 40
+
+    # TODO: check if the site already exists
+    site_id = create_utr_site(
+      name: site_name,
+      description: site_name,
+      targets:,
+      engine_id:,
+      scan_template_id:
+    )
+    if site_id.nil?
+      puts "Site #{site_name} already exists!"
+      return
+    end
+
+    # add site to shared credential
+    site = fetch_site(site_id)
+    add_shared_credentials(site)
+
+    # tag assets with business unit code, sub_area, app + utr,  network_zone
+    tag_names = assets.first.utr_tag_names
+    tags = tag_names.map do |tag_name|
+      puts "\tAdd tag: #{tag_name}"
+      upsert_tag(name: tag_name, cached_tags:)
     end
     tag_ids = tags.map(&:id)
 
@@ -283,12 +377,8 @@ class InsightVMApi
   def delete_site_by(id:, name:)
     raise 'Specify either id or name' if id.nil? && name.nil?
 
-    if id
-      delete_site(id)
-    else
-      site = fetch_site_by_name(name)
-      delete_site(site.id) unless site.nil?
-    end
+    site_id = id || fetch_site_by_name(name)&.id
+    delete_site(site_id) unless site_id.nil?
   end
 
   def delete_site(site_id)
@@ -297,14 +387,11 @@ class InsightVMApi
     site = fetch_site(site_id)
     raise "Site #{site_id} does not exist." if site.nil?
 
-    puts "Site #{site.id} #{site.name}"
-
-    puts 'Delete asset group with the same name as the site'
+    puts "\t Delete asset group with the same name as the site"
     delete_asset_group_by(name: site.name)
 
-    puts "Deleting #{site.assets} assets from site #{site_id}"
-    delete_site_assets(site_id:)
-    puts "Delete site #{site_id}"
+    puts "\t Remove #{site.assets} assets from site"
+    delete("/sites/#{site_id}/assets", '')
     delete('/sites', site_id)
   end
 

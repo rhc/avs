@@ -113,7 +113,8 @@ class Db
     column_names = columns.join(', ')
     placeholders = columns.map.with_index(1) { |_, i| "$#{i}" }.join(', ')
     conflict_target = model.class.primary_key.join(', ') # Unique identifier assumption
-    # puts "---- conflict_target #{conflict_target}"
+
+    # puts "---- conflict_target: #{conflict_target}"
     # puts "---- table_name: #{table_name}"
     # puts "---- model.class: #{model.class}"
     # puts "---- model.class.primary_key: #{model.class.primary_key}"
@@ -193,10 +194,9 @@ class Db
         progress_bar.increment
       end
     end
-
   rescue PG::Error => e
     puts "An error occurred: #{e.message}"
-  ensure 
+  ensure
     @connection.exec('DEALLOCATE bulk_upsert_statement')
   end
 

@@ -9,3 +9,4 @@ class Country < Domain::Model
     'code'
   end
 end
+
