@@ -50,6 +50,10 @@ class Domain
       new(transformed_data)
     end
 
+    def self.from_csv(row)
+      from_json(row.to_h)
+    end
+
     def to_s
       self.class.columns.map { |attr| send(attr) }.join(',')
     end

@@ -127,11 +127,10 @@ class CmdbSite < Domain::Model
   end
 end
 
-class DiscoverySite < Domain::Model
+class CountryDiscoverySite < Domain::Model
   attr_accessor :id,
                 :name,
                 :country,
-                :targets,
                 :network_zone
 
   def self.table_name
@@ -162,9 +161,5 @@ class DiscoverySite < Domain::Model
     else
       'Unknown'
     end
-  end
-
-  def target_names
-    targets.map(&:target)
   end
 end

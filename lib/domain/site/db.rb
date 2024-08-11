@@ -11,16 +11,13 @@ class Db
     end
   end
 
+  def fetch_country_discovery_sites_from_db
+    fetch_view('country_discovery_site_view') do |row|
+      yield CountryDiscoverySite.from_csv(row)
+    end
+  end
+
   def save_country_discovery_site(site)
     upsert(site)
-    site.targets.each do |target|
-      next if target.type == 'host'
-
-      site_target = DiscoverySiteTarget.new(
-        site_id: site.id,
-        subnet: target.target
-      )
-      upsert(site_target)
-    end
   end
 end

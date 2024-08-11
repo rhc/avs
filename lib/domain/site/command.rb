@@ -37,13 +37,27 @@ class App
       end
     end
 
-    c.desc 'Save country discovery sites'
+    c.desc 'List Country discovery sites from DB'
+    c.command 'list:country_discovery_from_db' do |l|
+      l.action do |_global_options, _options, _args|
+        App.db.fetch_country_discovery_sites_from_db do |discovery_site|
+          puts "#{discovery_site.name}"
+          puts "#{discovery_site.country} - #{discovery_site.network_zone}"
+          puts "#{discovery_site.target_names}"
+          puts
+        end
+      end
+    end
+
+    c.desc 'Save country discovery sites and subnets'
     c.command 'save:country_discovery' do |l|
       l.action do |_global_options, _options, _args|
         App.api.fetch_country_discovery_sites do |site|
           puts "Saving #{site.name} ..."
-          puts "Save #{site.targets.length} targets"
           App.db.save_country_discovery_site(site)
+          targets = App.api.fetch_site_included_targets(site.id)
+          puts "Save #{targets.length} targets"
+          App.db.save_country_discovery_site_targets(targets)
         end
       end
     end
