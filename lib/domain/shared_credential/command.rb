@@ -18,7 +18,7 @@ class App
           next if id && credential.id != id
           next if name && !credential.name.downcase.include?(name.downcase)
 
-          puts credential
+          puts credential.to_json
         end
       end
     end

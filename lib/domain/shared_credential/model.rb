@@ -1,27 +1,21 @@
 # frozen_string_literal: true
 
-# Shared Credential can be used in multiple sites
-# NOTE: There is no dimension, so the API is the source of truth
-class SharedCredential
-  attr_accessor :id, :description, :host_restriction, :port_restriction, :name, :account, :site_assignment, :sites
+require_relative '../model'
 
-  def initialize(id:,
-                 name:,
-                 account:,
-                 site_assignment:,
-                 sites:,
-                 description:,
-                 host_restriction:,
-                 port_restriction:)
-    @account = account
-    @description = description
-    @host_restriction = host_restriction
-    @id = id
-    @name = name
-    @port_restriction = port_restriction
-    @site_assignment  = site_assignment
-    @sites = sites
-  end
+# SharedCredential represents a credential that can be used across multiple sites in the system.
+#
+# This class serves as a representation of shared credentials, which are primarily managed through
+# the API, as there is no corresponding dimension in the database.
+#
+class SharedCredential < Domain::Model
+  attr_accessor :id,
+                :description,
+                :host_restriction,
+                :port_restriction,
+                :name,
+                :account,
+                :site_assignment,
+                :sites
 
   def domain
     @account['domain']
@@ -47,19 +41,6 @@ class SharedCredential
     @account['permissionElevationUsername']
   end
 
-  def self.from_json(data)
-    SharedCredential.new(
-      account: data['account'],
-      description: data['description'],
-      host_restriction: data['hostRestriction'],
-      id: data['id'],
-      name: data['name'],
-      port_restriction: data['portRestriction'],
-      site_assignment: data['siteAssignment'],
-      sites: data['sites']
-    )
-  end
-
   def to_json(*_options)
     {
       account: @account,
@@ -76,8 +57,6 @@ class SharedCredential
   def to_s
     [id, name, service, domain, user_name].join ','
   end
-
-  def from_csv; end
 
   def to_csv
     site_ids = sites&.join('|') || ''

@@ -112,7 +112,7 @@ class CmdbSite < Domain::Model
 
   def self.from_csv(row)
     CmdbSite.new(
-      name: row[:site],
+      name: row[:name],
       country_code: row[:country_code],
       business_unit: row[:business_unit],
       sub_area: row[:sub_area],
@@ -131,7 +131,9 @@ class CountryDiscoverySite < Domain::Model
   attr_accessor :id,
                 :name,
                 :country,
-                :network_zone
+                :network_zone,
+                :scan_engine,
+                :scan_template
 
   def self.table_name
     'country_discovery_site'

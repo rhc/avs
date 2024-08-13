@@ -15,7 +15,7 @@ class Db
       next if target.type == 'host'
 
       discovery_site_target = DiscoverySiteTarget.new(
-        site_id: site.id,
+        site_id: target.site_id,
         subnet: target.target
       )
       upsert(discovery_site_target)

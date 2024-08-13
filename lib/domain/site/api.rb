@@ -36,16 +36,15 @@ class InsightVMApi
     fetch_sites do |site|
       next unless site.country_discovery?
 
-      targets = fetch_site_included_targets(site.id)
       discovery_site = CountryDiscoverySite.new(
         id: site.id,
         name: site.name,
-        targets:
+        scan_engine: site.scan_engine,
+        scan_template: site.scan_template
       )
       yield discovery_site
     end
   end
-
 
   def fetch_utr_sites
     sites = []

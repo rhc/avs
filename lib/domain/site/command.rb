@@ -29,10 +29,8 @@ class App
     c.command 'list:country_discovery' do |l|
       l.action do |_global_options, _options, _args|
         App.api.fetch_country_discovery_sites do |discovery_site|
-          puts "#{discovery_site.name}"
-          puts "#{discovery_site.country} - #{discovery_site.network_zone}"
-          puts "#{discovery_site.target_names}"
-          puts
+          puts "#{discovery_site.to_json}"
+          puts ''
         end
       end
     end
@@ -41,10 +39,7 @@ class App
     c.command 'list:country_discovery_from_db' do |l|
       l.action do |_global_options, _options, _args|
         App.db.fetch_country_discovery_sites_from_db do |discovery_site|
-          puts "#{discovery_site.name}"
-          puts "#{discovery_site.country} - #{discovery_site.network_zone}"
-          puts "#{discovery_site.target_names}"
-          puts
+          puts "#{discovery_site}"
         end
       end
     end
@@ -53,10 +48,10 @@ class App
     c.command 'save:country_discovery' do |l|
       l.action do |_global_options, _options, _args|
         App.api.fetch_country_discovery_sites do |site|
-          puts "Saving #{site.name} ..."
+          puts "Save #{site.name}"
           App.db.save_country_discovery_site(site)
           targets = App.api.fetch_site_included_targets(site.id)
-          puts "Save #{targets.length} targets"
+          puts "\t Save #{targets.length} subnets"
           App.db.save_country_discovery_site_targets(targets)
         end
       end
@@ -243,6 +238,33 @@ class App
         App.api.fetch_site_assets(site_id:) do |asset|
           puts asset.to_json
         end
+      end
+    end
+
+    c.desc 'Create UTR discovery sites '
+    c.command 'create:utr_discovery' do |n|
+      # n.flag [:cc, 'country-code'], desc: '2-letter country code'
+      # n.flag [:bu, 'business-unit'], desc: 'Business unit'
+      # n.flag [:sa, 'sub-area'], desc: 'Sub area'
+      # n.flag [:app, 'application'], desc: 'Application'
+      # n.flag [:zone], desc: 'DMZ or Core Network'
+      # n.switch ['starts-discovery', :starts_discovery], desc: 'Starts a discovery scan for each site',
+      # default_value: true
+
+      n.action do |_global_options, options, _args|
+        business_unit = options[:business_unit]
+        if business_unit.nil?
+          puts 'Cannot create a new site without the business unit name.'
+          exit
+        end
+        starts_discovery = options[:starts_discovery]
+        puts 'Fetching assets from CMDB ...'
+        cmdb_assets = App.db.fetch_cmdb_assets
+        App.api.create_utr_sites_for(
+          business_unit:,
+          cmdb_assets:,
+          starts_discovery:
+        )
       end
     end
 
