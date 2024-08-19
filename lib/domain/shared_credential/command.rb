@@ -23,16 +23,6 @@ class App
       end
     end
 
-    # c.desc 'Get credential by id'
-    # c.command :get do |g|
-    #   g.desc 'Credential unique id'
-    #   g.action do |_global_options, options, _args|
-    #     site_id = options[:id]
-    #     credential = App.api.fetch_shared_credential(site_id)
-    #     puts credential.to_json
-    #   end
-    # end
-
     c.desc 'List UTR sites from shared credential'
     c.command :utr_site_list do |usl|
       usl.action do |_global_options, options, _args|

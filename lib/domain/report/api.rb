@@ -238,7 +238,7 @@ class InsightVMApi
     end
     tag_ids = tags.map(&:id)
 
-    add_utr_tags(report_id:, tag_ids:)
+    add_tags_to_site(report_id:, tag_ids:)
     report_id
   end
 

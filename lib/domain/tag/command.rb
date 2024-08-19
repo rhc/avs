@@ -58,7 +58,7 @@ class App
       g.flag ['by-name', :by_name]
       g.action do |_global_options, options, _args|
         name = options[:by_name]
-        tag = App.api.fetch_tag_by_name(name)
+        tag = App.api.find_tag_by_name(name)
         puts tag.to_json unless tag.nil?
       end
     end

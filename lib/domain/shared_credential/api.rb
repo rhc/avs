@@ -5,16 +5,27 @@ require 'set'
 require_relative 'model'
 
 class InsightVMApi
-  @shared_credentials = nil
+  def shared_credentials
+    @shared_credentials ||= fetch_shared_credentials.to_a
+  end
 
-  def all_shared_credentials
-    @all_shared_credentials ||= fetch_all_shared_credentials
+  def fetch_shared_credentials
+    return to_enum(__method__) unless block_given?
+
+    fetch_all('/shared_credentials') do |resource|
+      yield SharedCredential.from_json(resource)
+    end
+  end
+
+  def fetch_assigned_shared_credentials(site_id:)
+    shared_credentials.select do |shared_credential|
+      shared_credential.assigned_to_all_sites? || shared_credential.sites&.include?(site_id.to_i)
+    end
   end
 
   # TODO: use directly country code 2024-04-25 08:53
   def fetch_country_cyberark(country)
-    credentials = all_shared_credentials
-    credentials.find { |credential| credential.cyberark?(country) }
+    shared_credentials.find { |credential| credential.cyberark?(country) }
   end
 
   def list_shared_credential_utr_sites(credential, utr_sites)
@@ -56,43 +67,26 @@ class InsightVMApi
     # puts "Credentials #{credentials}"
     return [] if credentials.empty?
 
-    all_shared_credentials.select do |shared_credential|
+    shared_credentials.select do |shared_credential|
       credentials.include?(shared_credential.name)
     end
   end
 
   # Add the site_id to the shared credential sites
   def update_shared_credential_sites(credential:, site_ids: [])
+    return if credential.assigned_to_all_sites?
+
     new_site_ids = site_ids - credential.sites
-    if new_site_ids.empty?
-      puts "#{credential.name} contains already sites #{site_ids}"
-      return
-    end
+    return if new_site_ids.empty?
 
     credential.sites += new_site_ids
     endpoint = "/shared_credentials/#{credential.id}"
     put(endpoint, credential)
   end
 
-  def fetch_shared_credentials
-    fetch_all('/shared_credentials') do |resource|
-      yield SharedCredential.from_json(resource)
-    end
-  end
-
   def fetch_shared_credential(id)
     fetch("/shared_credentials/#{id}") do |data|
-      SharedCredential.from_json(data)
+      yield SharedCredential.from_json(data)
     end
-  end
-
-  private
-
-  def fetch_all_shared_credentials
-    list = []
-    fetch_shared_credentials do |shared_credential|
-      list << shared_credential
-    end
-    list
   end
 end

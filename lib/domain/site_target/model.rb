@@ -9,12 +9,23 @@ class SiteTarget < Domain::Model
                 :target,
                 :scope
 
+  def initialize(attributes = {})
+    attributes[:type] = determine_target_type(attributes[:target]) if attributes[:type].nil? && attributes[:target]
+    super(attributes)
+  end
+
   def self.primary_key
-    'id'
+    %w[site_id target type included scope]
   end
 
   def self.table_name
     'site_target'
+  end
+
+  private
+
+  def determine_target_type(target)
+    target.match?(/[a-zA-Z]/) ? 'host' : 'ip'
   end
 end
 

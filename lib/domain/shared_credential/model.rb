@@ -55,7 +55,7 @@ class SharedCredential < Domain::Model
   end
 
   def to_s
-    [id, name, service, domain, user_name].join ','
+    "#{name} #{account}"
   end
 
   def to_csv
@@ -68,5 +68,9 @@ class SharedCredential < Domain::Model
   # and the name contains the country name
   def cyberark?(country)
     name.downcase.include?('cyberark') && name.downcase.include?(country.downcase)
+  end
+
+  def assigned_to_all_sites?
+    site_assignment == 'all-sites'
   end
 end

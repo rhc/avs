@@ -45,7 +45,13 @@ class InsightVMApi
 
     addresses.map do |target|
       type = contains_letters?(target) ? 'host' : 'ip'
-      SiteTarget.new({ site_id:, target:, type:, included:, scope: nil })
+      SiteTarget.new({
+                       site_id:,
+                       target:,
+                       type:,
+                       included:,
+                       scope: nil
+                     })
     end
   end
 

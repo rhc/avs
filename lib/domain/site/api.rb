@@ -13,6 +13,8 @@ class InsightVMApi
   end
 
   def fetch_sites
+    return to_enum(__method__) unless block_given?
+
     fetch_all('/sites') do |resource|
       yield Site.from_json(resource)
     end
@@ -26,16 +28,33 @@ class InsightVMApi
   end
 
   def fetch_site_by_name(name)
-    fetch_sites do |site|
-      return site if site.name.downcase == name.downcase
+    fetch_sites.find do |site|
+      site.name.downcase == name.downcase
     end
-    nil
+  end
+
+  def site_exists?(name)
+    !fetch_site_by_name(name).nil?
   end
 
   def fetch_country_discovery_sites
-    fetch_sites do |site|
-      next unless site.country_discovery?
+    return to_enum(__method__) unless block_given?
 
+    fetch_sites.select(&:country_discovery?).each do |site|
+      discovery_site = CountryDiscoverySite.new(
+        id: site.id,
+        name: site.name,
+        scan_engine: site.scan_engine,
+        scan_template: site.scan_template
+      )
+      yield discovery_site
+    end
+  end
+
+  def fetch_cmdb_discovery_sites
+    return to_enum(__method__) unless block_given?
+
+    fetch_sites.select(&:cmdb_discovery?).each do |site|
       discovery_site = CountryDiscoverySite.new(
         id: site.id,
         name: site.name,
@@ -47,11 +66,7 @@ class InsightVMApi
   end
 
   def fetch_utr_sites
-    sites = []
-    fetch_sites do |site|
-      sites << site if site.utr?
-    end
-    sites
+    fetch_sites.select(&:utr?).to_a
   end
 
   def delete_utr_sites(confirmation: true)
@@ -237,54 +252,61 @@ class InsightVMApi
     end
   end
 
-  def create_utr_discovery_site_from(
-    site_name:,
-    cmdb_assets:,
-    cached_tags: {}
+  def create_cmdb_discovery_site(
+    discovery_site:,
+    starts_discovery: true
   )
-    assets = cmdb_assets.select { |asset| asset.site_name == site_name }
-                        .select(&:onboard?)
-
-    return if assets.empty?
-
-    country = assets.first.country
-    targets = assets.map(&:fqdn)
-    scan_engine_pool = fetch_country_scan_engine_pools(country)
-    # puts "Scan engine pool #{scan_engine_pool}"
-    engine_id = scan_engine_pool[:id]
-    scan_template_id = fetch_discovery_scan_template_id(country)
-    puts
-    puts '-' * 40
-    puts "Site #{site_name}\nTargets: #{targets.length} #{targets.join(' ')}"
-    puts '-' * 40
-
-    # TODO: check if the site already exists
     site_id = create_utr_site(
-      name: site_name,
-      description: site_name,
-      targets:,
-      engine_id:,
-      scan_template_id:
+      name: discovery_site.name,
+      description: discovery_site.name,
+      targets: discovery_site.included_targets,
+      engine_id: discovery_site.scan_engine,
+      scan_template_id: discovery_site.scan_template
     )
+
     if site_id.nil?
-      puts "Site #{site_name} already exists!"
+      puts "#{discovery_site.name} site was not created"
       return
     end
+    add_site_shared_credentials(
+      cmdb_site_id: site_id,
+      country_discovery_site_id: discovery_site.country_discovery_site_id
+    )
+    add_site_tags(
+      site_id:,
+      tag_names: discovery_site.tag_names
+    )
+    starts_discovery_scan(site_id) if starts_discovery
+    site_id
+  rescue StandardError => e
+    puts "Error occured while creating site: #{e.message}"
+    puts "Delete partially created #{discovery_site.name}"
+    delete_site(site_id) unless site_id.nil?
+    nil
+  end
 
-    # add site to shared credential
-    site = fetch_site(site_id)
-    add_shared_credentials(site)
-
-    # tag assets with business unit code, sub_area, app + utr,  network_zone
-    tag_names = assets.first.utr_tag_names
+  def add_site_tags(site_id:, tag_names:)
     tags = tag_names.map do |tag_name|
-      puts "\tAdd tag: #{tag_name}"
-      upsert_tag(name: tag_name, cached_tags:)
+      upsert_tag(name: tag_name)
     end
     tag_ids = tags.map(&:id)
+    add_tags_to_site(site_id:, tag_ids:)
+  end
 
-    add_utr_tags(site_id:, tag_ids:)
-    site_id
+  def add_site_shared_credentials(
+    cmdb_site_id:,
+    country_discovery_site_id:
+  )
+    credentials = fetch_assigned_shared_credentials(
+      site_id: country_discovery_site_id
+    )
+    site_ids = [cmdb_site_id]
+    credentials.each do |credential|
+      update_shared_credential_sites(
+        credential:,
+        site_ids:
+      )
+    end
   end
 
   # return site.id if success
@@ -331,11 +353,11 @@ class InsightVMApi
     tag_names = assets.first.utr_tag_names
     tags = tag_names.map do |tag_name|
       puts "\tAdd tag: #{tag_name}"
-      upsert_tag(name: tag_name, cached_tags:)
+      upsert_tag(name: tag_name)
     end
     tag_ids = tags.map(&:id)
 
-    add_utr_tags(site_id:, tag_ids:)
+    add_tags_to_site(site_id:, tag_ids:)
     site_id
   end
 
@@ -356,16 +378,7 @@ class InsightVMApi
     end
   end
 
-  def add_utr_tags(site_id:, tag_ids:)
-    tag_ids.each do |tag_id|
-      put("/sites/#{site_id}/tags/#{tag_id}", nil)
-    end
-  end
-
-  def starts_discovery_scan(site_id:)
-    site = fetch_site(site_id)
-    raise "Site ##{siteId} does not exist." if site.nil?
-
+  def starts_discovery_scan(site_id)
     params = {}
     post("/sites/#{site_id}/scans", params)
   end

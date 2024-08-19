@@ -5,14 +5,14 @@ require_relative '../site_target/model'
 require_relative 'model'
 
 class Db
-  def fetch_utr_site_from_cmdb
-    fetch_view('utr_site_view') do |row|
-      CmdbSite.from_csv(row)
+  def fetch_cmdb_discovery_sites
+    fetch_view(CmdbDiscoverySite.view) do |row|
+      yield CmdbDiscoverySite.from_csv(row)
     end
   end
 
   def fetch_country_discovery_sites_from_db
-    fetch_view('country_discovery_site_view') do |row|
+    fetch_view(CountryDiscoverySite.view) do |row|
       yield CountryDiscoverySite.from_csv(row)
     end
   end

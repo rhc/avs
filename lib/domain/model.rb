@@ -43,6 +43,10 @@ class Domain
       name.underscore
     end
 
+    def self.view
+      "#{table_name}_view"
+    end
+
     def self.from_json(data)
       transformed_data = data.transform_keys do |key|
         key.to_s.underscore.to_sym

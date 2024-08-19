@@ -57,14 +57,45 @@ class App
       end
     end
 
-    c.desc 'List UTR sites from cmdb'
-    c.command 'list:utr_from_cmdb' do |ldb|
+    c.desc 'List UTR cmdb discovery sites'
+    c.command 'list:cmdb_discovery_from_db' do |ldb|
       ldb.action do |_global_options, options, _args|
         name = options[GLI::Command::PARENT][:name]&.downcase
-        App.db.fetch_utr_site_from_cmdb do |site|
+        App.db.fetch_cmdb_discovery_sites do |site|
           next if name && !site.name.downcase.include?(name)
 
           puts site.to_json
+        end
+      end
+    end
+
+    c.desc 'List UTR cmdb discovery sites'
+    c.command 'list:cmdb_discovery_from_ivm' do |ldb|
+      ldb.action do |_global_options, options, _args|
+        name = options[GLI::Command::PARENT][:name]&.downcase
+        App.api.fetch_cmdb_discovery_sites do |site|
+          next if name && !site.name.downcase.include?(name)
+
+          puts site.name.to_json
+        end
+      end
+    end
+
+    c.desc 'Delete UTR cmdb discovery sites'
+    c.command 'delete:cmdb_discovery' do |ldb|
+      ldb.action do |_global_options, _options, _args|
+        App.api.delete_utr_sites(confirmation: false)
+      end
+    end
+
+    c.desc 'Create UTR cmdb discovery sites'
+    c.command 'create:cmdb_discovery' do |ldb|
+      ldb.action do |_global_options, _options, _args|
+        App.db.fetch_cmdb_discovery_sites do |discovery_site|
+          puts discovery_site.name
+          next if App.api.site_exists?(discovery_site.name)
+
+          App.api.create_cmdb_discovery_site(discovery_site:)
         end
       end
     end
@@ -109,14 +140,29 @@ class App
       end
     end
 
-    c.desc 'List shared credentials'
-    c.command :shared_credential_list do |scl|
+    c.desc 'List shared credentials assigned to the site'
+    c.command 'list:shared_credentials' do |scl|
       scl.action do |_global_options, options, _args|
         site_id = options[GLI::Command::PARENT][:id]
-        raise 'Site ID is required' if site_id.nil?
+        site_name_pattern = options[GLI::Command::PARENT][:name]&.downcase
+        raise 'Either Site ID or Site Name is required' if site_id.nil? && site_name_pattern.nil?
 
-        App.api.fetch_site_shared_credentials(site_id:).each do |shared_credential|
-          puts shared_credential
+        sites = []
+        if site_id
+          sites = [App.api.fetch_site(site_id)].compact
+        else
+          App.api.fetch_sites do |site|
+            sites << site if site.name.downcase.include?(site_name_pattern)
+          end
+        end
+        raise 'No site found with the provided ID or Name Pattern' if sites.empty?
+
+        sites.each do |site|
+          puts "#{site.name} Site"
+          shared_credentials = App.api.fetch_assigned_shared_credentials(site_id: site.id)
+          shared_credentials.each do |shared_credential|
+            puts "\t #{shared_credential}"
+          end
         end
       end
     end
@@ -155,7 +201,7 @@ class App
         end
         tag = App.api.upsert_tag(name: tag_name)
         puts "Tag #{tag.to_json}"
-        App.api.add_utr_tags(site_id:, tag_ids: [tag.id])
+        App.api.add_tags_to_site(site_id:, tag_ids: [tag.id])
       end
     end
 
