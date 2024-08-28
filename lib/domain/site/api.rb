@@ -280,6 +280,7 @@ class InsightVMApi
     site_id
   rescue StandardError => e
     puts "Error occured while creating site: #{e.message}"
+    puts e.backtrace.join("\n")
     puts "Delete partially created #{discovery_site.name}"
     delete_site(site_id) unless site_id.nil?
     nil
@@ -289,6 +290,8 @@ class InsightVMApi
     tags = tag_names.map do |tag_name|
       upsert_tag(name: tag_name)
     end
+    return nil if tags.nil?
+
     tag_ids = tags.map(&:id)
     add_tags_to_site(site_id:, tag_ids:)
   end

@@ -81,7 +81,7 @@ class InsightVMApi
 
     credential.sites += new_site_ids
     endpoint = "/shared_credentials/#{credential.id}"
-    put(endpoint, credential)
+    put(endpoint, credential.to_json)
   end
 
   def fetch_shared_credential(id)

@@ -29,7 +29,7 @@ class App
     c.command 'list:country_discovery' do |l|
       l.action do |_global_options, _options, _args|
         App.api.fetch_country_discovery_sites do |discovery_site|
-          puts "#{discovery_site.to_json}"
+          puts discovery_site.to_json
           puts ''
         end
       end
@@ -90,8 +90,11 @@ class App
 
     c.desc 'Create UTR cmdb discovery sites'
     c.command 'create:cmdb_discovery' do |ldb|
-      ldb.action do |_global_options, _options, _args|
+      ldb.action do |_global_options, options, _args|
+        name = options[GLI::Command::PARENT][:name]&.downcase
         App.db.fetch_cmdb_discovery_sites do |discovery_site|
+          next if name && !discovery_site.name.downcase.include?(name)
+
           puts discovery_site.name
           next if App.api.site_exists?(discovery_site.name)
 

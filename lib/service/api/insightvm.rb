@@ -115,7 +115,6 @@ class InsightVMApi
   # @param body [Hash] The request body to be sent as JSON
   def patch(endpoint, body)
     response = run_request(:patch, endpoint, body: body.to_json)
-
     return unless response.is_a?(Hash) && response[:error]
 
     puts "Error PATCH #{endpoint}: #{response[:error]}"
@@ -126,8 +125,7 @@ class InsightVMApi
   # @param endpoint [String] The API endpoint to send the PUT request to
   # @param body [Hash] The request body to be sent as JSON
   def put(endpoint, body)
-    rewindable_body = make_rewindable(body)
-    response = run_request(:put, endpoint, body: rewindable_body)
+    response = run_request(:put, endpoint, body:)
 
     return response unless response.is_a?(Hash) && response[:error]
 
@@ -187,16 +185,5 @@ class InsightVMApi
   def confirm_action(prompt)
     print "#{prompt} (y/n): "
     gets.chomp.downcase == 'y'
-  end
-
-  def make_rewindable(body)
-    case body
-    when String
-      StringIO.new(body)
-    when Hash, Array
-      StringIO.new(body.to_json)
-    else
-      body.respond_to?(:read) ? body : StringIO.new(body.to_s)
-    end
   end
 end

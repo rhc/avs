@@ -31,7 +31,11 @@ class InsightVMApi
     end
 
     id = create_tag(name:)
-    return nil if id.nil?
+
+    if id.nil?
+      puts "Tag #{name} was not created"
+      return nil
+    end
 
     tag = fetch_tag(id)
     @cached_tags[name] = tag
@@ -41,7 +45,7 @@ class InsightVMApi
   def find_tag_by_name(name)
     fetch_all('/tags', { name: }) do |resource|
       tag = Tag.from_json(resource)
-      return tag if tag.name == name
+      return tag if tag.name.downcase == name.downcase
     end
     nil
   end
