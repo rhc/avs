@@ -11,9 +11,9 @@ class App
     c.desc 'List tags'
     c.command :list do |l|
       l.action do |_global_options, options, _args|
-        filter = options[GLI::Command::PARENT][:filter]&.downcase
+        name options[GLI::Command::PARENT][:filter]&.downcase
         App.api.fetch_tags do |tag|
-          next if filter && !tag.name.downcase.include?(filter)
+          next if name && !tag.name.downcase.include?(name)
 
           puts tag.to_json
         end

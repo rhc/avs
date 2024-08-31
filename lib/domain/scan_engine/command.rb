@@ -16,10 +16,10 @@ class App
 
       # TODO: l.desc 'Status (all|up|down)'
       l.action do |_global_options, options, _args|
-        filter = options[:filter]&.downcase
+        name options[:filter]&.downcase
         up = options[:up]
         App.api.fetch_scan_engines do |engine|
-          next if filter && !engine.name.downcase.include?(filter)
+          next if name && !engine.name.downcase.include?(name)
           next if up && up != engine.up?
 
           puts engine.to_json

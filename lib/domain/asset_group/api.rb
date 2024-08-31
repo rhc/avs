@@ -67,8 +67,8 @@ class InsightVMApi
   end
 
   def create_asset_group_for(site_id:, site_name:)
-    filter = SearchCriteria::Filter.from_site_id(site_id)
-    search_criteria = { match: 'all', filters: [filter.to_json] }
+    name SearchCriteria::Filter.from_site_id(site_id)
+    search_criteria = { match: 'all', filters: [name.to_json] }
     create_asset_group(
       name: site_name,
       description: "Access group for site #{site_id}",

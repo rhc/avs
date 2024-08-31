@@ -59,7 +59,7 @@ class SearchCriteria
 
   # Method to add a filter to the search criteria
   def add_filter(filter)
-    @filters << filter
+    @filters << name
   end
 
   # Class method to create SearchCriteria from a JSON string
