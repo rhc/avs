@@ -28,8 +28,8 @@ class InsightVMApi
   end
 
   def fetch_site_by_name(name)
-    fetch_sites.find do |site|
-      site.name.downcase == name.downcase
+    fetch_sites.find do |scan_engine_pool|
+      scan_engine_pool.name.downcase == name.downcase
     end
   end
 
@@ -40,26 +40,27 @@ class InsightVMApi
   def fetch_country_discovery_sites
     return to_enum(__method__) unless block_given?
 
-    fetch_sites.select(&:country_discovery?).each do |site|
+    fetch_sites.select(&:country_discovery?).each do |scan_engine_pool|
       discovery_site = CountryDiscoverySite.new(
-        id: site.id,
-        name: site.name,
-        scan_engine: site.scan_engine,
-        scan_template: site.scan_template
+        id: scan_engine_pool.id,
+        name: scan_engine_pool.name,
+        scan_engine: scan_engine_pool.scan_engine,
+        scan_template: scan_engine_pool.scan_template
       )
       yield discovery_site
     end
   end
 
+  # TODO: to removed as it is not use
   def fetch_cmdb_discovery_sites
     return to_enum(__method__) unless block_given?
 
-    fetch_sites.select(&:cmdb_discovery?).each do |site|
+    fetch_sites.select(&:cmdb_discovery?).each do |scan_engine_pool|
       discovery_site = CountryDiscoverySite.new(
-        id: site.id,
-        name: site.name,
-        scan_engine: site.scan_engine,
-        scan_template: site.scan_template
+        id: scan_engine_pool.id,
+        name: scan_engine_pool.name,
+        scan_engine: scan_engine_pool.scan_engine,
+        scan_template: scan_engine_pool.scan_template
       )
       yield discovery_site
     end
@@ -82,13 +83,13 @@ class InsightVMApi
       return
     end
 
-    sites.each do |site|
-      next unless site.utr? # double-check
+    sites.each do |scan_engine_pool|
+      next unless scan_engine_pool.utr? # double-check
 
       puts ''
-      puts "Deleting site #{site.name}"
+      puts "Deleting site #{scan_engine_pool.name}"
 
-      delete_site(site.id)
+      delete_site(scan_engine_pool.id)
     end
   end
 
@@ -149,6 +150,7 @@ class InsightVMApi
     result&.dig('id')
   end
 
+  # TODO: mark this function for deletion
   def create_utr_sites_for(
     business_unit:,
     cmdb_assets:,
@@ -205,16 +207,16 @@ class InsightVMApi
   end
 
   def upsert_utr_site_schedule(site_id:)
-    site = fetch_site(site_id)
-    raise 'The site is not a valid UTR site' unless site.utr?
+    scan_engine_pool = fetch_site(site_id)
+    raise 'The site is not a valid UTR site' unless scan_engine_pool.utr?
 
     delete_utr_site_schedules(site_id:)
 
     create_utr_site_schedule(site_id:)
   end
 
-  def toggle_utr_site_schedule(site:, enabled:)
-    site_id = site.id
+  def toggle_utr_site_schedule(scan_engine_pool:, enabled:)
+    site_id = scan_engine_pool.id
     fetch_site_scan_schedules(site_id:) do |scan_schedule|
       next if scan_schedule.enabled == enabled
 
@@ -224,13 +226,13 @@ class InsightVMApi
   end
 
   def create_utr_site_schedule(site_id:)
-    site = fetch_site(site_id)
-    raise 'The site is not a valid UTR site' unless site.utr?
+    scan_engine_pool = fetch_site(site_id)
+    raise 'The site is not a valid UTR site' unless scan_engine_pool.utr?
 
-    scan_name = site.name
-    slot = scan_slot(site.utr_digits)
-    country_code = site.country_code
-    scan_template_id = site.scan_template_id
+    scan_name = scan_engine_pool.name
+    slot = scan_slot(scan_engine_pool.utr_digits)
+    country_code = scan_engine_pool.country_code
+    scan_template_id = scan_engine_pool.scan_template_id
     duration_in_hours = 2
 
     create_weekly_scan(
@@ -244,6 +246,7 @@ class InsightVMApi
     )
   end
 
+  # TODO: mark for deletion
   def fetch_discovery_scan_template_id(country)
     if country == 'South Africa'
       settings[:za_discovery_template_id]
@@ -349,8 +352,8 @@ class InsightVMApi
     end
 
     # add site to shared credential
-    site = fetch_site(site_id)
-    add_shared_credentials(site)
+    scan_engine_pool = fetch_site(site_id)
+    add_shared_credentials(scan_engine_pool)
 
     # tag assets with business unit code, sub_area, app + utr,  network_zone
     tag_names = assets.first.utr_tag_names
@@ -365,18 +368,18 @@ class InsightVMApi
   end
 
   def upsert_site_shared_credentials(site_id:)
-    site = fetch_site(site_id)
-    raise "Site #{site_id} does not exist." if site.nil?
-    raise "Site #{site.name} is not a UTR site" unless site.utr?
+    scan_engine_pool = fetch_site(site_id)
+    raise "Site #{site_id} does not exist." if scan_engine_pool.nil?
+    raise "Site #{scan_engine_pool.name} is not a UTR site" unless scan_engine_pool.utr?
 
-    add_shared_credentials(site)
+    add_shared_credentials(scan_engine_pool)
   end
 
-  def add_shared_credentials(site)
-    site_ids = [site.id]
-    shared_credentials = fetch_site_cyberark_credentials(site)
+  def add_shared_credentials(scan_engine_pool)
+    site_ids = [scan_engine_pool.id]
+    shared_credentials = fetch_site_cyberark_credentials(scan_engine_pool)
     shared_credentials.each do |credential|
-      puts "#{site.name} Shared Credential #{credential.name}"
+      puts "#{scan_engine_pool.name} Shared Credential #{credential.name}"
       update_shared_credential_sites(credential:, site_ids:)
     end
   end
@@ -396,13 +399,13 @@ class InsightVMApi
   def delete_site(site_id)
     raise 'Cannot delete site without id' if site_id.nil?
 
-    site = fetch_site(site_id)
-    raise "Site #{site_id} does not exist." if site.nil?
+    scan_engine_pool = fetch_site(site_id)
+    raise "Site #{site_id} does not exist." if scan_engine_pool.nil?
 
     puts "\t Delete asset group with the same name as the site"
-    delete_asset_group_by(name: site.name)
+    delete_asset_group_by(name: scan_engine_pool.name)
 
-    puts "\t Remove #{site.assets} assets from site"
+    puts "\t Remove #{scan_engine_pool.assets} assets from site"
     delete("/sites/#{site_id}/assets", '')
     delete('/sites', site_id)
   end
@@ -425,24 +428,24 @@ class InsightVMApi
   end
 
   def fetch_site_shared_credentials(site_id:)
-    site = fetch_site(site_id)
-    raise "Site #{site_id} not found" if site.nil?
+    scan_engine_pool = fetch_site(site_id)
+    raise "Site #{site_id} not found" if scan_engine_pool.nil?
 
-    fetch_site_cyberark_credentials(site)
+    fetch_site_cyberark_credentials(scan_engine_pool)
   end
 
   def fetch_site_cyberark_credentials(site)
-    country_code = site.country_code
+    country_code = scan_engine_pool.country_code
     if country_code != 'za'
-      country = find_by_country_code site.country_code
+      country = find_by_country_code scan_engine_pool.country_code
       Array(fetch_country_cyberark(country.name))
     else
-      domains = fetch_site_domains(site)
+      domains = fetch_site_domains(scan_engine_pool)
       fetch_domain_cyberark(domains)
     end
   end
 
   def fetch_site_domains(site)
-    fetch_site_target_domains(site.id)
+    fetch_site_target_domains(scan_engine_pool.id)
   end
 end

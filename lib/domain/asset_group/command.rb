@@ -39,12 +39,12 @@ class App
              desc: 'Site', required: true
 
       n.action do |_global_options, options, _args|
-        site_name = options[:site_name]
+        scan_engine_pool_name = options[:site_name]
 
-        site = App.api.fetch_site_by_name(site_name)
-        raise "Cannot find the #{site_name} site" if site.nil?
+        scan_engine_pool = App.api.fetch_site_by_name(site_name)
+        raise "Cannot find the #{site_name} site" if scan_engine_pool.nil?
 
-        asset_group_id = App.api.create_asset_group_for site_id: site.id, site_name: site.name
+        asset_group_id = App.api.create_asset_group_for site_id: scan_engine_pool.id, site_name: scan_engine_pool.name
         raise 'Asset group was not created' if asset_group_id.nil?
       end
     end

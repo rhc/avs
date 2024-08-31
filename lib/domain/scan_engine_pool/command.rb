@@ -13,8 +13,8 @@ class App
 
       l.action do |_global_options, options, _args|
         filter = options[:filter]&.downcase
-        App.api.fetch_scan_engine_pools do |site|
-          puts site.to_json if filter.nil? || site.name.downcase.include?(filter)
+        App.api.fetch_scan_engine_pools do |scan_engine_pool|
+          puts scan_engine_pool.to_json if filter.nil? || scan_engine_pool.name.downcase.include?(filter)
         end
       end
     end
@@ -24,9 +24,9 @@ class App
       g.desc 'scan engine pool ID'
       g.flag :id
       g.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[:id]
-        credential = App.api.fetch_scan_engine_pool(site_idte_id)
-        puts credential.to_json
+        id = options[:id]
+        scan_engine_pool = App.api.fetch_scan_engine_pool(id)
+        puts scan_engine_pool.to_json
       end
     end
   end

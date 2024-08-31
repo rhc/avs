@@ -67,27 +67,3 @@ class ScanEngine
     name == 'Rapid7 Hosted Scan Engine'
   end
 end
-
-class ScanEnginePool
-  attr_accessor :id, :name, :engines, :sites
-
-  def initialize(site_idte_idte_idte_id:, name:, engines:, sites:)
-    @id = site_idte_id
-    @name = name
-    @engines = engines
-    @sites = sites
-  end
-
-  def self.from_json(data)
-    ScanEnginePool.new(
-      id: data['id'],
-      name: data['name'],
-      engines: data['engines'],
-      sites: data['sites']
-    )
-  end
-
-  def to_json(*_options)
-    { id:, name:, engines:, sites: }.to_json
-  end
-end

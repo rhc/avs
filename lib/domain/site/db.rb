@@ -18,6 +18,6 @@ class Db
   end
 
   def save_country_discovery_site(site)
-    upsert(site)
+    upsert(scan_engine_pool)
   end
 end
