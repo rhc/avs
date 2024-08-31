@@ -45,6 +45,10 @@ class App
     MailService.instance
   end
 
+  def self.parent(options, key)
+    options[GLI::Command::PARENT][key]
+  end
+
   desc 'Manage Admin rights'
   command :admin do |c|
     c.desc 'Grant access to db views for a user'
