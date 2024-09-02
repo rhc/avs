@@ -51,7 +51,6 @@ class InsightVMApi
     end
   end
 
-  # TODO: to removed as it is not use
   def fetch_cmdb_discovery_sites
     return to_enum(__method__) unless block_given?
 
@@ -434,7 +433,7 @@ class InsightVMApi
     fetch_site_cyberark_credentials(scan_engine_pool)
   end
 
-  def fetch_site_cyberark_credentials(site)
+  def fetch_site_cyberark_credentials(_site)
     country_code = scan_engine_pool.country_code
     if country_code != 'za'
       country = find_by_country_code scan_engine_pool.country_code
@@ -445,7 +444,7 @@ class InsightVMApi
     end
   end
 
-  def fetch_site_domains(site)
+  def fetch_site_domains(_site)
     fetch_site_target_domains(scan_engine_pool.id)
   end
 end

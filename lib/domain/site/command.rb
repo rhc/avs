@@ -44,6 +44,15 @@ class App
       end
     end
 
+    c.desc 'List cmdb vulnerability sites from DB'
+    c.command 'list:cmdb_vulnerability_from_db' do |l|
+      l.action do |_global_options, _options, _args|
+        App.db.fetch_cmdb_vulnerability_sites do |discovery_site|
+          puts discovery_site.to_json
+        end
+      end
+    end
+
     c.desc 'Save country discovery sites and subnets'
     c.command 'save:country_discovery' do |l|
       l.action do |_global_options, _options, _args|
@@ -91,7 +100,7 @@ class App
     c.desc 'Create UTR cmdb discovery sites'
     c.command 'create:cmdb_discovery' do |ldb|
       ldb.action do |_global_options, options, _args|
-        name = options[GLI::Command::PARENT][:name]&.downcase
+        name = parent(options, :name)&.downcase
         App.db.fetch_cmdb_discovery_sites do |discovery_site|
           next if name && !discovery_site.name.downcase.include?(name)
 
@@ -99,6 +108,21 @@ class App
           next if App.api.site_exists?(discovery_site.name)
 
           App.api.create_cmdb_discovery_site(discovery_site:)
+        end
+      end
+    end
+
+    c.desc 'Create UTR cmdb vulnerability sites'
+    c.command 'create:cmdb_vulnerability' do |ldb|
+      ldb.action do |_global_options, options, _args|
+        name = parent(options, :name)&.downcase
+        App.db.fetch_cmdb_vulnerability_sites do |vulnerability_site|
+          next if name && !vulnerability_site.name.downcase.include?(name)
+
+          puts vulnerability_site.name
+          next if App.api.site_exists?(vulnerability_site.name)
+
+          App.api.create_cmdb_vulnerability_site(vulnerability_site:)
         end
       end
     end

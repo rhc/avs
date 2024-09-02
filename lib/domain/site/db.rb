@@ -11,6 +11,12 @@ class Db
     end
   end
 
+  def fetch_cmdb_vulnerability_sites
+    fetch_view(CmdbVulnerabilitySite.view) do |row|
+      yield CmdbVulnerabilitySite.from_csv(row)
+    end
+  end
+
   def fetch_country_discovery_sites_from_db
     fetch_view(CountryDiscoverySite.view) do |row|
       yield CountryDiscoverySite.from_csv(row)
@@ -18,6 +24,6 @@ class Db
   end
 
   def save_country_discovery_site(site)
-    upsert(scan_engine_pool)
+    upsert(site)
   end
 end

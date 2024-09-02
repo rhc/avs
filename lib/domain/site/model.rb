@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../../service/time_zone'
 require_relative '../model'
 
 # The Site class represents a site in the system, containing various attributes
@@ -8,6 +9,7 @@ require_relative '../model'
 class Site < Domain::Model
   UTR_PATTERN = /:UTR\d{5}$/
   NETWORK_DISCOVERY_PATTERN = /Network Discovery Scan/
+  CMDB_VULNERABILITY_PATTERN = /Vulnerability Scan/
 
   attr_accessor :id,
                 :name,
@@ -64,9 +66,18 @@ class Site < Domain::Model
   def cmdb_discovery?
     utr?
   end
+
+  # return true if the site name
+  # contains only 2 colons (:)
+  # and it is not a cmdb_discovery?
+  def cmdb_vulnerability?
+    return false if cmdb_discovery?
+
+    name =~ CMDB_VULNERABILITY_PATTERN && name.count(':') == 2
+  end
 end
 
-# CmdbSite represents a site from the Configuration Management Database (CMDB).
+# CmdbDiscoverySite represents a site from the Configuration Management Database (CMDB).
 # It contains various attributes related to the site's location, business context,
 # and network information.
 #
@@ -101,6 +112,36 @@ class CmdbDiscoverySite < Domain::Model
 
   def included_targets
     targets.split(/\s+/)
+  end
+end
+
+# CmdbVulnerabilitySite represents a site from the Configuration Management Database (CMDB).
+# It contains various attributes related to the site's location, business context,
+# and network information.
+#
+class CmdbVulnerabilitySite < Domain::Model
+  attr_accessor :country_code,
+                :network_zone,
+                :business_unit_code,
+                :assets,
+                :start_day,
+                :start_hour,
+                :end_day,
+                :engine_pool,
+                :end_hour
+
+  def name
+    prefix = [country_code, network_zone, business_unit_code].join ':'
+    suffix = 'Vulnerability Scan'
+    "#{prefix} #{suffix}"
+  end
+
+  def duration_in_hours
+    Service::TimeZone.duration_in_hours(start_day, start_hour, end_day, end_hour)
+  end
+
+  def self.view
+    'cmdb_vulnerability_site_view'
   end
 end
 
