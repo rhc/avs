@@ -63,7 +63,7 @@ class App
     c.command 'list:cmdb_vulnerability_from_db' do |l|
       l.action do |_global_options, _options, _args|
         App.db.fetch_cmdb_vulnerability_sites do |discovery_site|
-          puts discovery_site.to_json
+          puts discovery_site.name
         end
       end
     end
