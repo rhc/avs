@@ -398,7 +398,7 @@ class App
       end
     end
 
-    c.desc 'Starts a discovery scan for the site'
+    c.desc 'Starts a discovery scan for the CMDB discovery site'
     c.command :starts_discovery_scan do |d|
       d.action do |_global_options, options, _args|
         name = parent(options, :name)

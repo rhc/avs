@@ -309,13 +309,13 @@ class InsightVMApi
       engine_id: vulnerability_site.scan_engine_pool_id,
       scan_template_id: scan_template.id
     )
-
     raise "#{vulnerability_site.name} site was not created" if site_id.nil?
 
-    # add_site_shared_credentials(
-    #   cmdb_site_id: site_id,
-    #   country_vulnerability_site_id: vulnerability_site.country_vulnerability_site_id
-    # )
+    add_site_shared_credentials(
+      cmdb_site_id: site_id,
+      country_discovery_site_id: vulnerability_site.country_discovery_site_id
+    )
+
     # TODO: add the schedule
     puts 'Enable schedule' if enable_schedule
     site_id

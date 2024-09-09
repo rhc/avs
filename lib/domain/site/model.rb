@@ -127,10 +127,10 @@ class CmdbVulnerabilitySite < Domain::Model
                 :start_day,
                 :start_hour,
                 :end_day,
+                :end_hour,
                 :engine_pool,
-                :scan_engine_pool_id
-                :end_hour
-
+                :scan_engine_pool_id,
+                :country_discovery_site_id
 
   def name
     prefix = [country_code, network_zone, business_unit_code].join ':'
