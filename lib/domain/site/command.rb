@@ -401,10 +401,13 @@ class App
     c.desc 'Starts a discovery scan for the site'
     c.command :starts_discovery_scan do |d|
       d.action do |_global_options, options, _args|
-        site_id = parent(options, :id)
-        raise 'You must specify the site id.' if site_id.nil?
+        name = parent(options, :name)
+        App.api.fetch_cmdb_discovery_sites do |site|
+          next if name && !site.name.downcase.include?(name)
 
-        App.api.starts_discovery_scan(site_id:)
+          puts site.name
+          App.api.starts_discovery_scan(site.id)
+        end
       end
     end
 
