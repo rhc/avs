@@ -204,10 +204,10 @@ class InsightVMApi
 
     country = assets.first.country
     targets = assets.map(&:fqdn)
-    scan_engine_pool = fetch_country_scan_engine_pools(country)
+    sitentry_scan_engine_pools(country)
     # puts "Scan engine pool #{scan_engine_pool}"
-    engine_id = scan_engine_pool[:id]
-    scan_template_id = fetch_discovery_scan_template_id(country)
+    engine_id = site[:id]
+    scan_template_id = fetch_vulnerability_scan_template_id(country)
     puts
     puts '-' * 40
     puts "Report #{report_name}\nTargets: #{targets.length} #{targets.join(' ')}"

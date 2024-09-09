@@ -16,11 +16,11 @@ class App
       l.action do |_global_options, options, _args|
         name = options[GLI::Command::PARENT][:name]&.downcase
         utr = options[:utr]
-        App.api.fetch_sites do |scan_engine_pool|
-          next if name && !scan_engine_pool.name.downcase.include?(name)
-          next if utr && !scan_engine_pool.utr?
+        App.api.fetch_sites do |site|
+          next if name && !site.name.downcase.include?(name)
+          next if utr && !site.utr?
 
-          puts scan_engine_pool.to_json
+          puts site.to_json
         end
       end
     end
@@ -31,6 +31,21 @@ class App
         App.api.fetch_country_discovery_sites do |discovery_site|
           puts discovery_site.to_json
           puts ''
+        end
+      end
+    end
+
+    c.desc 'Add Critical tag to CMDB discovery sites'
+    c.command 'critical_tag:cmdb_discovery' do |l|
+      l.action do |_global_options, _options, _args|
+        critical_tag = App.api.upsert_tag(name: 'critical app')
+        tag_ids = [critical_tag.id]
+        App.api.fetch_cmdb_discovery_sites do |discovery_site|
+          puts discovery_site.to_json
+          App.api.add_tags_to_site(
+            site_id: discovery_site.id,
+            tag_ids:
+          )
         end
       end
     end
@@ -56,10 +71,10 @@ class App
     c.desc 'Save country discovery sites and subnets'
     c.command 'save:country_discovery' do |l|
       l.action do |_global_options, _options, _args|
-        App.api.fetch_country_discovery_sites do |scan_engine_pool|
-          puts "Save #{scan_engine_pool.name}"
-          App.db.save_country_discovery_site(scan_engine_pool)
-          targets = App.api.fetch_site_included_targets(scan_engine_pool.id)
+        App.api.fetch_country_discovery_sites do |site|
+          puts "Save #{site.name}"
+          App.db.save_country_discovery_site(site)
+          targets = App.api.fetch_site_included_targets(site.id)
           puts "\t Save #{targets.length} subnets"
           App.db.save_country_discovery_site_targets(targets)
         end
@@ -70,10 +85,10 @@ class App
     c.command 'list:cmdb_discovery_from_db' do |ldb|
       ldb.action do |_global_options, options, _args|
         name = options[GLI::Command::PARENT][:name]&.downcase
-        App.db.fetch_cmdb_discovery_sites do |scan_engine_pool|
-          next if name && !scan_engine_pool.name.downcase.include?(name)
+        App.db.fetch_cmdb_discovery_sites do |site|
+          next if name && !site.name.downcase.include?(name)
 
-          puts scan_engine_pool.to_json
+          puts site.to_json
         end
       end
     end
@@ -82,10 +97,10 @@ class App
     c.command 'list:cmdb_discovery_from_ivm' do |ldb|
       ldb.action do |_global_options, options, _args|
         name = options[GLI::Command::PARENT][:name]&.downcase
-        App.api.fetch_cmdb_discovery_sites do |scan_engine_pool|
-          next if name && !scan_engine_pool.name.downcase.include?(name)
+        App.api.fetch_cmdb_discovery_sites do |site|
+          next if name && !site.name.downcase.include?(name)
 
-          puts scan_engine_pool.name.to_json
+          puts site.name.to_json
         end
       end
     end
@@ -178,15 +193,15 @@ class App
         if site_id
           sites = [App.api.fetch_site(site_id)].compact
         else
-          App.api.fetch_sites do |scan_engine_pool|
-            sites << scan_engine_pool if scan_engine_pool.name.downcase.include?(site_name_pattern)
+          App.api.fetch_sites do |site|
+            sites << site if site.name.downcase.include?(site_name_pattern)
           end
         end
         raise 'No site found with the provided ID or Name Pattern' if sites.empty?
 
-        sites.each do |scan_engine_pool|
-          puts "#{scan_engine_pool.name} Site"
-          shared_credentials = App.api.fetch_assigned_shared_credentials(site_id: scan_engine_pool.id)
+        sites.each do |site|
+          puts "#{site.name} Site"
+          shared_credentials = App.api.fetch_assigned_shared_credentials(site_id: site.id)
           shared_credentials.each do |shared_credential|
             puts "\t #{shared_credential}"
           end
@@ -209,9 +224,9 @@ class App
       scl.action do |_global_options, _options, _args|
         puts 'Fetching UTR sites ...'
         sites = App.api.fetch_utr_sites
-        sites.each do |scan_engine_pool|
+        sites.each do |site|
           # puts site.name
-          App.api.upsert_site_shared_credentials(site_id: scan_engine_pool.id)
+          App.api.upsert_site_shared_credentials(site_id: site.id)
         end
       end
     end
@@ -237,9 +252,9 @@ class App
       s.action do |_global_options, _options, _args|
         puts 'Fetching UTR sites ...'
         sites = App.api.fetch_utr_sites
-        sites.each do |scan_engine_pool|
-          puts "Site #{scan_engine_pool.name}"
-          schedule_id = App.api.create_utr_site_schedule(site_id: scan_engine_pool.id)
+        sites.each do |site|
+          puts "Site #{site.name}"
+          schedule_id = App.api.create_utr_site_schedule(site_id: site.id)
           puts 'Schedule created' unless schedule_id.nil?
         end
       end
@@ -252,8 +267,8 @@ class App
         enabled = options[:active]
         puts 'Fetching UTR sites ...'
         sites = App.api.fetch_utr_sites
-        sites.each do |scan_engine_pool|
-          puts "Site #{scan_engine_pool.name}"
+        sites.each do |site|
+          puts "Site #{site.name}"
           App.api.toggle_utr_site_schedule(scan_engine_pool_engine_pool:, enabled:)
         end
       end
@@ -373,10 +388,20 @@ class App
       end
     end
 
+    c.desc 'Delete UTR vulnerability scan site'
+    c.command 'delete:cmdb_vulnerability_scan' do |d|
+      d.action do |_global_options, _options, _args|
+        App.api.fetch_sites.select(&:cmdb_vulnerability?).each do |site|
+          puts site.to_json
+          App.api.delete_site(site.id, cascade: false)
+        end
+      end
+    end
+
     c.desc 'Starts a discovery scan for the site'
     c.command :starts_discovery_scan do |d|
       d.action do |_global_options, options, _args|
-        site_id = options[GLI::Command::PARENT][:id]
+        site_id = parent(options, :id)
         raise 'You must specify the site id.' if site_id.nil?
 
         App.api.starts_discovery_scan(site_id:)

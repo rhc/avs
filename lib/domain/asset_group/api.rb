@@ -12,13 +12,12 @@ class InsightVMApi
     end
   end
 
-  def fetch_asset_group_assets(id, opts = { read_timeout: 200 })
-    asset_ids = []
+  def fetch_asset_group_assets(id, opts = { read_timeout: 200 }, &block)
+    return to_enum(__method__, id, opts) unless block_given?
+
     endpoint = "/asset_groups/#{id}/assets"
-    fetch_all(endpoint, opts) do |asset_id|
-      asset_ids << asset_id
-    end
-    asset_ids
+
+    fetch_all(endpoint, opts, &block)
   end
 
   def all_asset_groups(opts)

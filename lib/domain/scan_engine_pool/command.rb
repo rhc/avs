@@ -15,10 +15,10 @@ class App
 
       l.action do |_global_options, options, _args|
         name = parent(options, :name)&.downcase
-        App.api.fetch_scan_engine_pools do |scan_engine_pool|
-          next if name && !scan_engine_pool.name.downcase.include?(name)
+        App.api.fetch_scan_engine_pools do |site|
+          next if name && !site.name.downcase.include?(name)
 
-          puts scan_engine_pool.to_json
+          puts site.to_json
         end
       end
     end
@@ -30,8 +30,8 @@ class App
         id = parent(options)[:id]
         raise 'The scan engine pool id is a required parameter' if id.nil?
 
-        scan_engine_pool = App.api.fetch_scan_engine_pool(id)
-        puts scan_engine_pool.to_json
+        siteetch_scan_engine_pool(id)
+        puts site.to_json
       end
     end
   end

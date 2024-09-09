@@ -30,8 +30,8 @@ class InsightVMApi
   #
   def scan_engines_from_up_to_down(engines, previous_status)
     downs = engines.select(&:down?).reject(&:rapid7_hosted?)
-    downs.select do |scan_engine_pool|
-      status = previous_status[scan_engine_pool.id]
+    downs.select do |site|
+      status = previous_status[site.id]
       status.nil? ? true : status
     end
   end

@@ -16,8 +16,8 @@ class InsightVMApi
 
   def _fetch_all_scan_engines_pools
     @scan_engine_pools = []
-    fetch_scan_engine_pools do |scan_engine_pool|
-      @scan_engine_pools << scan_engine_pool
+    fetch_scan_engine_pools do |site|
+      @scan_engine_pools << site
     end
     @scan_engine_pools
   end

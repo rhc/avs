@@ -13,8 +13,8 @@ class App
     c.command :list do |l|
       # TODO: l.desc 'Status (all|up|down)'
       l.action do |_global_options, options, _args|
-        name = options[GLI::Command::PARENT][:name]
-        type = options[GLI::Command::PARENT][:type]
+        name = parent(options, :name)
+        type = parent(options, :type)
         opts = { name:, type: }.compact
         App.api.fetch_asset_groups(opts) do |asset_group|
           puts asset_group.to_json
@@ -25,37 +25,21 @@ class App
     c.desc 'Get asset group by id'
     c.command :get do |g|
       g.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
+        id = parent(options, :id)
         raise 'You must specify the asset group Id' if site_idte_id.nil?
 
-        asset_group = App.api.fetch_asset_group(site_idte_id)
+        asset_group = App.api.fetch_asset_group(id)
         puts asset_group.to_json
-      end
-    end
-
-    c.desc 'Create asset_group for a site'
-    c.command :new do |n|
-      n.flag ['site-name', :site_name],
-             desc: 'Site', required: true
-
-      n.action do |_global_options, options, _args|
-        scan_engine_pool_name = options[:site_name]
-
-        scan_engine_pool = App.api.fetch_site_by_name(site_name)
-        raise "Cannot find the #{site_name} site" if scan_engine_pool.nil?
-
-        asset_group_id = App.api.create_asset_group_for site_id: scan_engine_pool.id, site_name: scan_engine_pool.name
-        raise 'Asset group was not created' if asset_group_id.nil?
       end
     end
 
     c.desc 'Delete asset groups'
     c.command :delete do |d|
       d.action do |_global_options, options, _args|
-        site_idte_idte_idte_id = options[GLI::Command::PARENT][:id]
-        name = options[GLI::Command::PARENT][:name]
+        id = parent(options, :id)
+        name = parent(options, :name)
 
-        App.api.delete_asset_group_by(site_idte_idte_idte_id:, name:)
+        App.api.delete_asset_group_by(id:, name:)
       end
     end
   end

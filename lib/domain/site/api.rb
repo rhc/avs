@@ -6,8 +6,8 @@ require_relative 'model'
 class InsightVMApi
   def settings
     {
-      ar_discovery_template_id: ENV['AR_DISCOVERY_TEMPLATE_ID'],
-      za_discovery_template_id: ENV['ZA_DISCOVERY_TEMPLATE_ID'],
+      ar_vulnerability_scan_template_name: ENV['AR_VULNERABILITY_SCAN_TEMPLATE_NAME'],
+      za_vulnerability_scan_template_name: ENV['ZA_VULNERABILITY_SCAN_TEMPLATE_NAME'],
       za_deep_dive_scanners: ENV['ZA_DEEP_DIVE_SCANNERS']
     }
   end
@@ -28,8 +28,8 @@ class InsightVMApi
   end
 
   def fetch_site_by_name(name)
-    fetch_sites.find do |scan_engine_pool|
-      scan_engine_pool.name.downcase == name.downcase
+    fetch_sites.find do |site|
+      site.name.downcase == name.downcase
     end
   end
 
@@ -37,15 +37,29 @@ class InsightVMApi
     !fetch_site_by_name(name).nil?
   end
 
+  # def fetch_cmdb_vulnerability_scan_sites
+  #   return to_enum(__method__) unless block_given?
+
+  #   fetch_sites.select(&:cmdb_vulnerability?).each do |site|
+  #     discovery_site = CmdbVulnerabilitySite.new(
+  #       id: site.id,
+  #       name: site.name,
+  #       scan_engine: site.scan_engine,
+  #       scan_template: site.scan_template
+  #     )
+  #     yield discovery_site
+  #   end
+  # end
+
   def fetch_country_discovery_sites
     return to_enum(__method__) unless block_given?
 
-    fetch_sites.select(&:country_discovery?).each do |scan_engine_pool|
+    fetch_sites.select(&:country_discovery?).each do |site|
       discovery_site = CountryDiscoverySite.new(
-        id: scan_engine_pool.id,
-        name: scan_engine_pool.name,
-        scan_engine: scan_engine_pool.scan_engine,
-        scan_template: scan_engine_pool.scan_template
+        id: site.id,
+        name: site.name,
+        scan_engine: site.scan_engine,
+        scan_template: site.scan_template
       )
       yield discovery_site
     end
@@ -54,12 +68,12 @@ class InsightVMApi
   def fetch_cmdb_discovery_sites
     return to_enum(__method__) unless block_given?
 
-    fetch_sites.select(&:cmdb_discovery?).each do |scan_engine_pool|
+    fetch_sites.select(&:cmdb_discovery?).each do |site|
       discovery_site = CountryDiscoverySite.new(
-        id: scan_engine_pool.id,
-        name: scan_engine_pool.name,
-        scan_engine: scan_engine_pool.scan_engine,
-        scan_template: scan_engine_pool.scan_template
+        id: site.id,
+        name: site.name,
+        scan_engine: site.scan_engine,
+        scan_template: site.scan_template
       )
       yield discovery_site
     end
@@ -82,13 +96,13 @@ class InsightVMApi
       return
     end
 
-    sites.each do |scan_engine_pool|
-      next unless scan_engine_pool.utr? # double-check
+    sites.each do |site|
+      next unless site.utr? # double-check
 
       puts ''
-      puts "Deleting site #{scan_engine_pool.name}"
+      puts "Deleting site #{site.name}"
 
-      delete_site(scan_engine_pool.id)
+      delete_site(site.id)
     end
   end
 
@@ -206,16 +220,16 @@ class InsightVMApi
   end
 
   def upsert_utr_site_schedule(site_id:)
-    scan_engine_pool = fetch_site(site_id)
-    raise 'The site is not a valid UTR site' unless scan_engine_pool.utr?
+    sitee(site_id)
+    raise 'The site is not a valid UTR site' unless site.utr?
 
     delete_utr_site_schedules(site_id:)
 
     create_utr_site_schedule(site_id:)
   end
 
-  def toggle_utr_site_schedule(scan_engine_pool:, enabled:)
-    site_id = scan_engine_pool.id
+  def toggle_utr_site_schedule(site)
+    site_id = site.id
     fetch_site_scan_schedules(site_id:) do |scan_schedule|
       next if scan_schedule.enabled == enabled
 
@@ -225,13 +239,13 @@ class InsightVMApi
   end
 
   def create_utr_site_schedule(site_id:)
-    scan_engine_pool = fetch_site(site_id)
-    raise 'The site is not a valid UTR site' unless scan_engine_pool.utr?
+    sitee(site_id)
+    raise 'The site is not a valid UTR site' unless site.utr?
 
-    scan_name = scan_engine_pool.name
-    slot = scan_slot(scan_engine_pool.utr_digits)
-    country_code = scan_engine_pool.country_code
-    scan_template_id = scan_engine_pool.scan_template_id
+    scan_name = site.name
+    slot = scan_slot(site.utr_digits)
+    country_code = site.country_code
+    scan_template_id = site.scan_template_id
     duration_in_hours = 2
 
     create_weekly_scan(
@@ -245,13 +259,72 @@ class InsightVMApi
     )
   end
 
-  # TODO: mark for deletion
-  def fetch_discovery_scan_template_id(country)
-    if country == 'South Africa'
-      settings[:za_discovery_template_id]
+  def get_vulnerability_scan_template_name(country_code)
+    if country_code == 'za'
+      settings[:za_vulnerability_scan_template_name]
     else
-      settings[:ar_discovery_template_id]
+      settings[:ar_vulnerability_scan_template_name]
     end
+  end
+
+  def fetch_or_create_asset_group_for_cmdb_vulnerability_scan(site)
+    asset_group = fetch_asset_group_by_name(site.asset_group_name)
+    return asset_group.id unless asset_group.nil?
+
+    filters = [site.country_code, site.network_zone, site.business_unit_code].map do |tag|
+      {
+        field: 'custom-tag',
+        operator: 'is',
+        value: tag
+      }
+    end
+
+    create_asset_group(
+      name: site.asset_group_name,
+      description: "Asset Group for #{site.name}",
+      search_criteria: { match: 'all', filters: }
+    )
+  end
+
+  def fetch_vulnerability_scan_engine_pool(_site)
+    # TODO
+    ScanEngine.new({ id: 50 })
+  end
+
+  def create_cmdb_vulnerability_site(
+    vulnerability_site:,
+    enable_schedule: false
+  )
+    asset_group_id = fetch_or_create_asset_group_for_cmdb_vulnerability_scan(vulnerability_site)
+    raise "#{vulnerability_site.asset_group_name} asset group not found" if asset_group_id.nil?
+
+    country_code = vulnerability_site.country_code
+    scan_template = fetch_vulnerability_scan_template(country_code)
+
+    site_id = create_site(
+      name: vulnerability_site.name,
+      description: vulnerability_site.name,
+      importance: 'high',
+      included_asset_group_ids: [asset_group_id],
+      engine_id: vulnerability_site.scan_engine_pool_id,
+      scan_template_id: scan_template.id
+    )
+
+    raise "#{vulnerability_site.name} site was not created" if site_id.nil?
+
+    # add_site_shared_credentials(
+    #   cmdb_site_id: site_id,
+    #   country_vulnerability_site_id: vulnerability_site.country_vulnerability_site_id
+    # )
+    # TODO: add the schedule
+    puts 'Enable schedule' if enable_schedule
+    site_id
+  rescue StandardError => e
+    puts "Error occured while creating site: #{e.message}"
+    puts e.backtrace.join("\n")
+    puts "Delete partially created #{vulnerability_site.name}"
+    delete_site(site_id) unless site_id.nil?
+    nil
   end
 
   def create_cmdb_discovery_site(
@@ -328,10 +401,10 @@ class InsightVMApi
 
     country = assets.first.country
     targets = assets.map(&:fqdn)
-    scan_engine_pool = fetch_country_scan_engine_pools(country)
+    sitentry_scan_engine_pools(country)
     # puts "Scan engine pool #{scan_engine_pool}"
-    engine_id = scan_engine_pool[:id]
-    scan_template_id = fetch_discovery_scan_template_id(country)
+    engine_id = site[:id]
+    scan_template_id = fetch_vulnerability_scan_template_id(country)
     puts
     puts '-' * 40
     puts "Site #{site_name}\nTargets: #{targets.length} #{targets.join(' ')}"
@@ -351,8 +424,8 @@ class InsightVMApi
     end
 
     # add site to shared credential
-    scan_engine_pool = fetch_site(site_id)
-    add_shared_credentials(scan_engine_pool)
+    site = fetch_site(site_id)
+    add_shared_credentials(site)
 
     # tag assets with business unit code, sub_area, app + utr,  network_zone
     tag_names = assets.first.utr_tag_names
@@ -367,18 +440,18 @@ class InsightVMApi
   end
 
   def upsert_site_shared_credentials(site_id:)
-    scan_engine_pool = fetch_site(site_id)
-    raise "Site #{site_id} does not exist." if scan_engine_pool.nil?
-    raise "Site #{scan_engine_pool.name} is not a UTR site" unless scan_engine_pool.utr?
+    sitee(site_id)
+    raise "Site #{site_id} does not exist." if site.nil?
+    raise "Site #{site.name} is not a UTR site" unless site.utr?
 
-    add_shared_credentials(scan_engine_pool)
+    add_shared_credentials(site)
   end
 
-  def add_shared_credentials(scan_engine_pool)
-    site_ids = [scan_engine_pool.id]
-    shared_credentials = fetch_site_cyberark_credentials(scan_engine_pool)
+  def add_shared_credentials(site)
+    site_ids = [site.id]
+    shared_credentials = fetch_site_cyberark_credentials(site)
     shared_credentials.each do |credential|
-      puts "#{scan_engine_pool.name} Shared Credential #{credential.name}"
+      puts "#{site.name} Shared Credential #{credential.name}"
       update_shared_credential_sites(credential:, site_ids:)
     end
   end
@@ -395,17 +468,19 @@ class InsightVMApi
     delete_site(site_id) unless site_id.nil?
   end
 
-  def delete_site(site_id)
+  def delete_site(site_id, cascade: true)
     raise 'Cannot delete site without id' if site_id.nil?
 
-    scan_engine_pool = fetch_site(site_id)
-    raise "Site #{site_id} does not exist." if scan_engine_pool.nil?
+    if cascade
+      site = fetch_site(site_id)
+      raise "Site #{site_id} does not exist." if site.nil?
 
-    puts "\t Delete asset group with the same name as the site"
-    delete_asset_group_by(name: scan_engine_pool.name)
+      puts "\t Delete asset group with the same name as the site"
+      delete_asset_group_by(name: site.name)
 
-    puts "\t Remove #{scan_engine_pool.assets} assets from site"
-    delete("/sites/#{site_id}/assets", '')
+      puts "\t Remove #{site.assets} assets from site"
+      delete("/sites/#{site_id}/assets", '')
+    end
     delete('/sites', site_id)
   end
 
@@ -427,10 +502,10 @@ class InsightVMApi
   end
 
   def fetch_site_shared_credentials(site_id:)
-    scan_engine_pool = fetch_site(site_id)
-    raise "Site #{site_id} not found" if scan_engine_pool.nil?
+    sitee(site_id)
+    raise "Site #{site_id} not found" if site.nil?
 
-    fetch_site_cyberark_credentials(scan_engine_pool)
+    fetch_site_cyberark_credentials(site)
   end
 
   def fetch_site_cyberark_credentials(_site)

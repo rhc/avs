@@ -30,7 +30,7 @@ class InsightVMApi
 
   def list_shared_credential_utr_sites(credential, utr_sites)
     site_ids = credential.sites
-    utr_sites.select { |scan_engine_pool| site_ids.include?(scan_engine_pool.id) }
+    utr_sites.select { |site| site_ids.include?(site.id) }
   end
 
   def remove_shared_credential_utr_sites(credential, utr_sites)

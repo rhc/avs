@@ -35,8 +35,8 @@ class App
         puts 'Fetching UTR sites ...'
         utr_sites = App.api.fetch_utr_sites
         sites = App.api.list_shared_credential_utr_sites(credential, utr_sites)
-        sites.each do |scan_engine_pool|
-          puts [scan_engine_pool.id, scan_engine_pool.name].join ','
+        sites.each do |site|
+          puts [site.id, site.name].join ','
         end
       end
     end

@@ -128,12 +128,18 @@ class CmdbVulnerabilitySite < Domain::Model
                 :start_hour,
                 :end_day,
                 :engine_pool,
+                :scan_engine_pool_id
                 :end_hour
+
 
   def name
     prefix = [country_code, network_zone, business_unit_code].join ':'
     suffix = 'Vulnerability Scan'
     "#{prefix} #{suffix}"
+  end
+
+  def asset_group_name
+    [country_code, network_zone, business_unit_code].join(':')
   end
 
   def duration_in_hours

@@ -74,13 +74,12 @@ class App
     c.desc 'Delete ghosts'
     c.command :delete_ghosts do |dg|
       dg.action do |_global_options, _options, _args|
-        puts 'Api call'
         asset_group = App.api.fetch_asset_group_by_name('Ghosts')
         assets = asset_group.assets
         unless assets.zero?
           puts "#{assets} ghosts are going to be deleted."
           puts 'Fetching ghost asset_ids ...'
-          ids = App.api.fetch_asset_group_assets(asset_group.id)
+          ids = App.api.fetch_asset_group_assets(asset_group.id).to_a
           App.api.delete_assets(ids)
         end
       end
