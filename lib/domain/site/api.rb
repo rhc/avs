@@ -238,6 +238,44 @@ class InsightVMApi
     end
   end
 
+  def create_cmdb_vulnerability_scan_site_schedule(
+    site:,
+    vulnerability_scan_site:,
+    enable_schedule: false
+  )
+    start_hour = vulnerability_scan_site.start_hour.to_i
+    now = DateTime.now
+    start_time = DateTime.new(
+      now.year,
+      now.month,
+      now.day,
+      start_hour
+    )
+    local_time = Service::DateTime.closest_day_of_week(
+      start_time,
+      vulnerability_scan_site.start_day
+    )
+    start = Service::TimeZone.iso8601(
+      country_code: vulnerability_scan_site.country_code,
+      local_time:
+    )
+    repeat = ScanSchedule::Repeat.new(
+      every: 'week',
+      day_of_week: vulnerability_scan_site.start_day,
+      interval: 1
+    )
+    create_scan_schedule(
+      site_id: site.id,
+      duration: "PT#{vulnerability_scan_site.duration_in_hours}H",
+      scan_engine_id: site.scan_engine,
+      scan_template_id: site.scan_template,
+      repeat:,
+      start:,
+      scan_name: site.name,
+      enabled: enable_schedule
+    )
+  end
+
   def create_utr_site_schedule(site_id:)
     sitee(site_id)
     raise 'The site is not a valid UTR site' unless site.utr?
@@ -292,37 +330,43 @@ class InsightVMApi
   end
 
   def create_cmdb_vulnerability_site(
-    vulnerability_site:,
+    vulnerability_scan_site:,
     enable_schedule: false
   )
-    asset_group_id = fetch_or_create_asset_group_for_cmdb_vulnerability_scan(vulnerability_site)
+    puts "\t Create asset group"
+    asset_group_id = fetch_or_create_asset_group_for_cmdb_vulnerability_scan(vulnerability_scan_site)
     raise "#{vulnerability_site.asset_group_name} asset group not found" if asset_group_id.nil?
 
-    country_code = vulnerability_site.country_code
+    puts "\t Create site"
+    country_code = vulnerability_scan_site.country_code
     scan_template = fetch_vulnerability_scan_template(country_code)
-
     site_id = create_site(
-      name: vulnerability_site.name,
-      description: vulnerability_site.name,
+      name: vulnerability_scan_site.name,
+      description: vulnerability_scan_site.name,
       importance: 'high',
       included_asset_group_ids: [asset_group_id],
-      engine_id: vulnerability_site.scan_engine_pool_id,
+      engine_id: vulnerability_scan_site.scan_engine_pool_id,
       scan_template_id: scan_template.id
     )
     raise "#{vulnerability_site.name} site was not created" if site_id.nil?
 
+    puts "\t Assign shared credentials"
     add_site_shared_credentials(
       cmdb_site_id: site_id,
-      country_discovery_site_id: vulnerability_site.country_discovery_site_id
+      country_discovery_site_id: vulnerability_scan_site.country_discovery_site_id
     )
 
-    # TODO: add the schedule
-    puts 'Enable schedule' if enable_schedule
+    puts "\t Create schedule"
+    site = fetch_site(site_id)
+    create_cmdb_vulnerability_scan_site_schedule(
+      site:,
+      vulnerability_scan_site:,
+      enable_schedule:
+    )
     site_id
   rescue StandardError => e
-    puts "Error occured while creating site: #{e.message}"
-    puts e.backtrace.join("\n")
-    puts "Delete partially created #{vulnerability_site.name}"
+    App.backtrace(e)
+    puts "\t Delete partially created #{vulnerability_scan_site.name}"
     delete_site(site_id) unless site_id.nil?
     nil
   end

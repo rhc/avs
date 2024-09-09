@@ -131,13 +131,15 @@ class App
     c.command 'create:cmdb_vulnerability' do |ldb|
       ldb.action do |_global_options, options, _args|
         name = parent(options, :name)&.downcase
-        App.db.fetch_cmdb_vulnerability_sites do |vulnerability_site|
-          next if name && !vulnerability_site.name.downcase.include?(name)
+        App.db.fetch_cmdb_vulnerability_sites do |vulnerability_scan_site|
+          next if name && !vulnerability_scan_site.name.downcase.include?(name)
 
-          puts vulnerability_site.name
-          next if App.api.site_exists?(vulnerability_site.name)
+          puts vulnerability_scan_site.name
+          next if App.api.site_exists?(vulnerability_scan_site.name)
 
-          App.api.create_cmdb_vulnerability_site(vulnerability_site:)
+          App.api.create_cmdb_vulnerability_site(
+            vulnerability_scan_site:
+          )
         end
       end
     end

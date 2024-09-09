@@ -49,6 +49,13 @@ class App
     options[GLI::Command::PARENT][key]
   end
 
+  def self.backtrace(exception, limit: 8, prefix: "\t ")
+    puts "#{prefix} Error occurred: #{exception.message}"
+    puts "#{prefix} ----------------------------"
+    puts exception.backtrace.first(limit).map { |line| "\t\t#{line}" }.join("\n")
+    puts "#{prefix} ----------------------------"
+  end
+
   desc 'Manage Admin rights'
   command :admin do |c|
     c.desc 'Grant access to db views for a user'

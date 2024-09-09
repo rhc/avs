@@ -18,6 +18,8 @@ class InsightVMApi
     schedules
   end
 
+
+  # TODO: remove this method
   def create_weekly_scan(
     day_of_week:,
     start_hour:,

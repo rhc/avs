@@ -46,18 +46,16 @@ module Service
       datetime.iso8601 + "[#{zone.name}]"
     end
 
-    DAYS_OF_WEEK = %w[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]
-
     def self.duration_in_hours(start_day, start_hour, end_day, end_hour)
-      start_index = DAYS_OF_WEEK.index(start_day)
-      end_index = DAYS_OF_WEEK.index(end_day)
+      start_index = Date::DAYNAMES.index(start_day.capitalize)
+      end_index = Date::DAYNAMES.index(end_day.capitalize)
 
       raise ArgumentError, 'Invalid day provided' if start_index.nil? || end_index.nil?
 
       end_index += 7 if start_index > end_index
 
-      start_hours = start_index * 24 + start_hour
-      end_hours = end_index * 24 + end_hour
+      start_hours = start_index * 24 + start_hour.to_i
+      end_hours = end_index * 24 + end_hour.to_i
       end_hours - start_hours
     end
   end
