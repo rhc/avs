@@ -125,8 +125,8 @@ class InsightVMApi
   # @param endpoint [String] The API endpoint to send the PUT request to
   # @param body [Hash] The request body to be sent as JSON
   def put(endpoint, body)
-    response = run_request(:put, endpoint, body:)
-
+    json = JSON.generate(body)
+    response = run_request(:put, endpoint, body: json)
     return response unless response.is_a?(Hash) && response[:error]
 
     puts "Error PUT #{endpoint}: #{response[:error]}"

@@ -6,12 +6,11 @@ require_relative 'model'
 class App
   desc 'Manage tags'
   command :tag do |c|
-    c.desc 'Filter tags by name (contains pattern)'
-    c.flag [:filter]
+    c.flag [:name], desc: 'Filter by name (contains pattern)'
     c.desc 'List tags'
     c.command :list do |l|
       l.action do |_global_options, options, _args|
-        name options[GLI::Command::PARENT][:filter]&.downcase
+        name = parent(options, :name)&.downcase
         App.api.fetch_tags do |tag|
           next if name && !tag.name.downcase.include?(name)
 
@@ -62,5 +61,7 @@ class App
         puts tag.to_json unless tag.nil?
       end
     end
+
+    c.default_command :list
   end
 end

@@ -48,23 +48,22 @@ class InsightVMApi
     end
   end
 
-  def update_report_owner(report, owner_id)
-    payload = report.to_hash.merge({ 'owner' => owner_id })
+  def update_report_query(report, query)
+    payload = report.to_hash.merge({ 'query' => query })
     payload.delete('id')
     payload.delete_if { |_k, v| v.nil? }
     endpoint = "/reports/#{report.id}"
+    puts payload
     put(endpoint, payload)
   end
 
-  def update_xxx_report_owner(owner_id)
-    fetch_reports do |report|
-      next unless report.name.starts_with?('xxx')
-      next if report.owner == owner_id
-
-      report.timezone = 'Africa/Harare'
-      puts "Change #{report.name} owner from #{report.owner}"
-      update_report_owner(report, owner_id)
-    end
+  def update_report_owner(report, owner_id)
+    payload = report.to_hash.merge({ 'owner' => owner_id.to_i })
+    payload.delete('id')
+    payload.delete_if { |_k, v| v.nil? }
+    endpoint = "/reports/#{report.id}"
+    puts "Payload.to_json #{payload.to_json}"
+    put(endpoint, payload)
   end
 
   def create_report(
@@ -125,15 +124,15 @@ class InsightVMApi
         next
       end
 
-      puts "\tCreate asset group: #{report_name}"
+      puts "\t Create asset group: #{report_name}"
       create_asset_group_for(report_id:, report_name:)
 
-      puts "\tSchedule the scan"
+      puts "\t Schedule the scan"
       # TODO
 
       next unless starts_discovery
 
-      puts "\tStart discovery scan"
+      puts "\t Start discovery scan"
       starts_discovery_scan(report_id:)
     end
   end
@@ -245,12 +244,8 @@ class InsightVMApi
   def delete_report_by(id:, name:)
     raise 'Specify either id or name' if id.nil? && name.nil?
 
-    if id
-      delete_report(id)
-    else
-      report = fetch_report_by_name(name)
-      delete_report(report.id)
-    end
+    report_id = id || fetch_report_by(name:)&.id
+    delete_report(report_id)
   end
 
   def delete_report(report_id)
@@ -259,12 +254,10 @@ class InsightVMApi
     report = fetch_report(report_id)
     raise "Report #{report_id} does not exist." if report.nil?
 
-    puts 'Delete asset group with the same name as the report'
+    puts "\t Delete asset group with the same name as the report"
     delete_asset_group_by(name: report.name)
 
-    puts "Delete assets from report #{report_id}"
-    delete("/reports/#{report_id}/assets", '')
-    puts "Delete report #{report_id}"
+    puts "\t Delete report #{report_id}"
     delete('/reports', report_id)
   end
 

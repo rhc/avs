@@ -20,9 +20,7 @@ class App
 
   version Avs::VERSION
 
-  subcommand_option_handling :normal
-  arguments :strict
-  # synopsis_format :compact
+  synopsis_format :compact
 
   pre do |_global, _command, _options, _args|
     # Pre logic here

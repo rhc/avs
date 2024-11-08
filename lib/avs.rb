@@ -7,6 +7,8 @@ require 'avs/version'
 class App
   extend GLI::App
   synopsis_format :compact
+  subcommand_option_handling :normal
+  arguments :strict
 end
 
 Dir.glob(File.join(__dir__, 'domain', '**', 'command.rb')).each do |file|
